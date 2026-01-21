@@ -1,8 +1,15 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import legacy from '@vitejs/plugin-legacy'
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    legacy({
+      targets: ['chrome >= 49', 'android >= 5'], // 支持Android 5+
+      additionalLegacyPolyfills: ['regenerator-runtime/runtime']
+    })
+  ],
   server: {
     port: 3000,
     host: true,
@@ -23,8 +30,10 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    // 针对低配置设备优化
-    minify: 'esbuild', // 使用esbuild压缩，更快
+    // 针对老版本Android优化
+    target: 'es2015', // 降低到ES2015，兼容老WebView
+    minify: 'esbuild',
+    cssTarget: 'chrome49', // 兼容Android 5.x WebView
     rollupOptions: {
       output: {
         manualChunks: {
