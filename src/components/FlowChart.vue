@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue'
 import * as echarts from 'echarts'
 
 const props = defineProps({
@@ -15,11 +15,18 @@ const props = defineProps({
 
 const chartRef = ref(null)
 let chartInstance = null
+let resizeObserver = null
 
 const initChart = () => {
   if (!chartRef.value) return
   
   try {
+    // 如果已存在实例，先销毁
+    if (chartInstance) {
+      chartInstance.dispose()
+      chartInstance = null
+    }
+    
     chartInstance = echarts.init(chartRef.value, null, {
       renderer: 'canvas', // 强制使用 canvas 渲染器（兼容性更好）
       width: 'auto',
@@ -127,34 +134,79 @@ const initChart = () => {
 const updateChart = () => {
   if (!chartInstance) return
   
-  chartInstance.setOption({
-    xAxis: {
-      data: props.chartData.times
-    },
-    series: [
-      { data: props.chartData.inside },
-      { data: props.chartData.enter },
-      { data: props.chartData.exit }
-    ]
-  })
+  try {
+    chartInstance.setOption({
+      xAxis: {
+        data: props.chartData.times
+      },
+      series: [
+        { data: props.chartData.inside },
+        { data: props.chartData.enter },
+        { data: props.chartData.exit }
+      ]
+    })
+  } catch (err) {
+    console.error('ECharts 更新失败:', err)
+  }
 }
 
 // 监听数据变化
-watch(() => props.chartData, updateChart, { deep: true })
+watch(() => props.chartData, () => {
+  nextTick(() => {
+    updateChart()
+  })
+}, { deep: true })
 
 // 监听窗口大小变化
 const handleResize = () => {
-  chartInstance?.resize()
+  if (chartInstance && !chartInstance.isDisposed()) {
+    try {
+      chartInstance.resize()
+    } catch (err) {
+      console.error('ECharts resize 失败:', err)
+    }
+  }
 }
 
 onMounted(() => {
-  initChart()
-  window.addEventListener('resize', handleResize)
+  nextTick(() => {
+    initChart()
+    
+    // 使用 ResizeObserver 代替 window resize（更精确）
+    if (chartRef.value && window.ResizeObserver) {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize()
+      })
+      resizeObserver.observe(chartRef.value)
+    } else {
+      // 降级方案
+      window.addEventListener('resize', handleResize)
+    }
+  })
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-  chartInstance?.dispose()
+  // 清理 ResizeObserver
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  } else {
+    window.removeEventListener('resize', handleResize)
+  }
+  
+  // 销毁 ECharts 实例
+  if (chartInstance) {
+    try {
+      if (!chartInstance.isDisposed()) {
+        chartInstance.dispose()
+      }
+    } catch (err) {
+      console.error('ECharts dispose 失败:', err)
+    }
+    chartInstance = null
+  }
+  
+  console.log('FlowChart 组件已清理')
 })
 </script>
 
