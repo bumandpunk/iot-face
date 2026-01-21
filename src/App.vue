@@ -354,38 +354,40 @@ onUnmounted(() => {
 
 <style scoped>
 .dashboard-container {
-  width: 100%;
+  width: 100vw;
   height: 100vh;
-  padding: 12px;
+  padding: 1vh 1vw;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 1vh;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
-/* 头部 */
+/* 头部 - 固定高度 */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 1vh 1.5vw;
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5vh;
+  box-shadow: 0 0.2vh 0.8vh rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
+  height: 6vh;
 }
 
 .network-status {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  gap: 0.5vw;
+  font-size: 1.2vh;
   color: #666;
 }
 
 .status-dot {
-  width: 8px;
-  height: 8px;
+  width: 0.8vh;
+  height: 0.8vh;
   border-radius: 50%;
   background: #ccc;
   position: relative;
@@ -417,45 +419,47 @@ onUnmounted(() => {
 }
 
 .title {
-  font-size: 22px;
+  font-size: 2.2vh;
   font-weight: 600;
   color: #1a1a1a;
-  letter-spacing: 1px;
+  letter-spacing: 0.1vw;
 }
 
 .datetime {
-  font-size: 13px;
+  font-size: 1.2vh;
   color: #666;
-  padding: 6px 12px;
+  padding: 0.6vh 1vw;
   background: #f5f5f5;
-  border-radius: 4px;
+  border-radius: 0.4vh;
 }
 
-/* 主内容区 */
+/* 主内容区 - 占据剩余空间 */
 .dashboard-content {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 12px;
+  gap: 1vw;
   flex: 1;
   overflow: hidden;
   min-height: 0;
+  max-height: calc(100vh - 32vh); /* 头部6vh + 图表24vh + 间距2vh */
 }
 
 .section-title {
-  font-size: 16px;
+  font-size: 1.6vh;
   font-weight: 600;
   color: #1a1a1a;
-  margin-bottom: 10px;
-  padding-bottom: 6px;
-  border-bottom: 2px solid #667eea;
+  margin-bottom: 1vh;
+  padding-bottom: 0.6vh;
+  border-bottom: 0.2vh solid #667eea;
+  flex-shrink: 0;
 }
 
 /* 统计区域 */
 .stats-section {
   background: rgba(255, 255, 255, 0.95);
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5vh 1vw;
+  border-radius: 0.8vh;
+  box-shadow: 0 0.2vh 0.8vh rgba(0, 0, 0, 0.1);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -465,47 +469,55 @@ onUnmounted(() => {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 1vw;
+  flex: 1;
 }
 
 .stat-card {
-  padding: 12px;
+  padding: 1.2vh 1vw;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  border-radius: 8px;
-  border: 2px solid #e1e8ed;
+  border-radius: 0.8vh;
+  border: 0.2vh solid #e1e8ed;
+  display: flex;
+  flex-direction: column;
 }
 
 .stat-label {
-  font-size: 12px;
+  font-size: 1.2vh;
   color: #666;
-  margin-bottom: 6px;
+  margin-bottom: 0.6vh;
+  flex-shrink: 0;
 }
 
 .stat-value-large {
-  font-size: 28px;
+  font-size: 2.8vh;
   font-weight: 700;
   color: #1a1a1a;
-  margin: 6px 0;
+  margin: 0.6vh 0;
+  flex-shrink: 0;
 }
 
 .stat-value-medium {
-  font-size: 36px;
+  font-size: 3.6vh;
   font-weight: 700;
   color: #667eea;
-  margin: 10px 0;
+  margin: 1vh 0;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .stat-meta {
-  font-size: 11px;
+  font-size: 1.1vh;
   color: #666;
-  margin-top: 6px;
+  margin-top: 0.6vh;
+  flex-shrink: 0;
 }
 
 .stat-note {
-  font-size: 10px;
+  font-size: 1vh;
   color: #999;
-  margin-top: 4px;
+  margin-top: 0.4vh;
+  flex-shrink: 0;
 }
 
 .highlight {
@@ -528,24 +540,25 @@ onUnmounted(() => {
   display: flex;
   align-items: flex-end;
   justify-content: space-around;
-  height: 30px;
-  margin: 10px 0;
-  gap: 3px;
+  height: 3vh;
+  margin: 1vh 0;
+  gap: 0.2vw;
+  flex-shrink: 0;
 }
 
 .chart-bar {
   flex: 1;
   background: #667eea;
-  border-radius: 2px;
-  min-height: 5px;
+  border-radius: 0.2vh;
+  min-height: 0.5vh;
 }
 
 /* 异常记录 */
 .alert-section {
   background: rgba(255, 255, 255, 0.95);
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5vh 1vw;
+  border-radius: 0.8vh;
+  box-shadow: 0 0.2vh 0.8vh rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -555,19 +568,19 @@ onUnmounted(() => {
 .alert-display {
   flex: 1;
   background: #1a1a2e;
-  border-radius: 6px;
-  padding: 10px;
+  border-radius: 0.6vh;
+  padding: 1vh;
   overflow-y: auto;
   min-height: 0;
 }
 
 .alert-item {
   display: flex;
-  gap: 8px;
-  padding: 6px;
-  font-size: 12px;
+  gap: 0.8vw;
+  padding: 0.6vh;
+  font-size: 1.2vh;
   font-family: 'Courier New', monospace;
-  margin-bottom: 4px;
+  margin-bottom: 0.4vh;
 }
 
 .alert-time {
@@ -587,33 +600,38 @@ onUnmounted(() => {
   color: #faad14;
 }
 
-/* 图表区域 */
+/* 图表区域 - 固定高度 */
 .chart-section {
   background: rgba(255, 255, 255, 0.95);
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  height: 220px;
+  padding: 1.5vh 1vw;
+  border-radius: 0.8vh;
+  box-shadow: 0 0.2vh 0.8vh rgba(0, 0, 0, 0.1);
+  height: 22vh;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .chart-legend {
   display: flex;
-  gap: 15px;
-  margin-bottom: 8px;
-  font-size: 12px;
+  gap: 1.5vw;
+  margin-bottom: 0.8vh;
+  font-size: 1.2vh;
+  flex-shrink: 0;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 0.5vw;
 }
 
 .legend-dot {
-  width: 10px;
-  height: 10px;
+  width: 1vh;
+  height: 1vh;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .legend-dot.orange {
@@ -644,26 +662,26 @@ onUnmounted(() => {
 
 .popup-content {
   background: #fff;
-  padding: 35px;
-  border-radius: 15px;
+  padding: 3.5vh 3vw;
+  border-radius: 1.5vh;
   text-align: center;
-  min-width: 350px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  min-width: 30vw;
+  box-shadow: 0 0.8vh 3vh rgba(0, 0, 0, 0.3);
   position: relative;
 }
 
 .popup-content.enter {
-  border-top: 4px solid #52c41a;
+  border-top: 0.4vh solid #52c41a;
 }
 
 .popup-content.exit {
-  border-top: 4px solid #1890ff;
+  border-top: 0.4vh solid #1890ff;
 }
 
 .popup-icon {
-  width: 50px;
-  height: 50px;
-  margin: 0 auto 15px;
+  width: 5vh;
+  height: 5vh;
+  margin: 0 auto 1.5vh;
   color: #667eea;
 }
 
@@ -673,19 +691,19 @@ onUnmounted(() => {
 }
 
 .popup-title {
-  font-size: 24px;
+  font-size: 2.4vh;
   font-weight: 600;
   color: #1a1a1a;
-  margin-bottom: 15px;
+  margin-bottom: 1.5vh;
 }
 
 .popup-avatar {
-  width: 100px;
-  height: 100px;
-  margin: 0 auto 15px;
+  width: 10vh;
+  height: 10vh;
+  margin: 0 auto 1.5vh;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid #667eea;
+  border: 0.3vh solid #667eea;
 }
 
 .popup-avatar img {
@@ -695,20 +713,20 @@ onUnmounted(() => {
 }
 
 .popup-name {
-  font-size: 20px;
+  font-size: 2vh;
   font-weight: 600;
   color: #1a1a1a;
-  margin-bottom: 8px;
+  margin-bottom: 0.8vh;
 }
 
 .popup-info {
-  font-size: 14px;
+  font-size: 1.4vh;
   color: #666;
-  margin-bottom: 12px;
+  margin-bottom: 1.2vh;
 }
 
 .popup-time {
-  font-size: 12px;
+  font-size: 1.2vh;
   color: #999;
 }
 
@@ -729,18 +747,18 @@ onUnmounted(() => {
 
 /* 滚动条样式 */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 0.4vw;
+  height: 0.4vh;
 }
 
 ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
+  border-radius: 0.2vw;
 }
 
 ::-webkit-scrollbar-thumb {
   background: rgba(102, 126, 234, 0.5);
-  border-radius: 2px;
+  border-radius: 0.2vw;
 }
 
 ::-webkit-scrollbar-thumb:hover {
