@@ -355,11 +355,12 @@ onUnmounted(() => {
 <style scoped>
 .dashboard-container {
   width: 100%;
-  height: 100%;
-  padding: 20px;
+  height: 100vh;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
+  overflow: hidden;
 }
 
 /* 头部 */
@@ -367,23 +368,24 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 30px;
+  padding: 10px 20px;
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .network-status {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 6px;
+  font-size: 13px;
   color: #666;
 }
 
 .status-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #ccc;
   position: relative;
@@ -415,91 +417,95 @@ onUnmounted(() => {
 }
 
 .title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 600;
   color: #1a1a1a;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 
 .datetime {
-  font-size: 14px;
+  font-size: 13px;
   color: #666;
-  padding: 8px 16px;
+  padding: 6px 12px;
   background: #f5f5f5;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
 /* 主内容区 */
 .dashboard-content {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 20px;
+  gap: 12px;
   flex: 1;
   overflow: hidden;
+  min-height: 0;
 }
 
 .section-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #1a1a1a;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
   border-bottom: 2px solid #667eea;
 }
 
 /* 统计区域 */
 .stats-section {
   background: rgba(255, 255, 255, 0.95);
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
+  gap: 10px;
 }
 
 .stat-card {
-  padding: 20px;
+  padding: 12px;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  border-radius: 10px;
+  border-radius: 8px;
   border: 2px solid #e1e8ed;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 12px;
   color: #666;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .stat-value-large {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 700;
   color: #1a1a1a;
-  margin: 10px 0;
+  margin: 6px 0;
 }
 
 .stat-value-medium {
-  font-size: 48px;
+  font-size: 36px;
   font-weight: 700;
   color: #667eea;
-  margin: 15px 0;
+  margin: 10px 0;
   text-align: center;
 }
 
 .stat-meta {
-  font-size: 13px;
+  font-size: 11px;
   color: #666;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .stat-note {
-  font-size: 12px;
+  font-size: 10px;
   color: #999;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .highlight {
@@ -522,9 +528,9 @@ onUnmounted(() => {
   display: flex;
   align-items: flex-end;
   justify-content: space-around;
-  height: 40px;
-  margin: 15px 0;
-  gap: 4px;
+  height: 30px;
+  margin: 10px 0;
+  gap: 3px;
 }
 
 .chart-bar {
@@ -537,29 +543,31 @@ onUnmounted(() => {
 /* 异常记录 */
 .alert-section {
   background: rgba(255, 255, 255, 0.95);
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .alert-display {
   flex: 1;
   background: #1a1a2e;
-  border-radius: 8px;
-  padding: 15px;
+  border-radius: 6px;
+  padding: 10px;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .alert-item {
   display: flex;
-  gap: 10px;
-  padding: 8px;
-  font-size: 14px;
+  gap: 8px;
+  padding: 6px;
+  font-size: 12px;
   font-family: 'Courier New', monospace;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .alert-time {
@@ -582,28 +590,29 @@ onUnmounted(() => {
 /* 图表区域 */
 .chart-section {
   background: rgba(255, 255, 255, 0.95);
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  height: 300px;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 220px;
+  flex-shrink: 0;
 }
 
 .chart-legend {
   display: flex;
-  gap: 20px;
-  margin-bottom: 10px;
-  font-size: 14px;
+  gap: 15px;
+  margin-bottom: 8px;
+  font-size: 12px;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .legend-dot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
 }
 
@@ -635,26 +644,26 @@ onUnmounted(() => {
 
 .popup-content {
   background: #fff;
-  padding: 40px;
-  border-radius: 20px;
+  padding: 35px;
+  border-radius: 15px;
   text-align: center;
-  min-width: 400px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  min-width: 350px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
   position: relative;
 }
 
 .popup-content.enter {
-  border-top: 5px solid #52c41a;
+  border-top: 4px solid #52c41a;
 }
 
 .popup-content.exit {
-  border-top: 5px solid #1890ff;
+  border-top: 4px solid #1890ff;
 }
 
 .popup-icon {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 20px;
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 15px;
   color: #667eea;
 }
 
@@ -664,19 +673,19 @@ onUnmounted(() => {
 }
 
 .popup-title {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
   color: #1a1a1a;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .popup-avatar {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 20px;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 15px;
   border-radius: 50%;
   overflow: hidden;
-  border: 4px solid #667eea;
+  border: 3px solid #667eea;
 }
 
 .popup-avatar img {
@@ -686,20 +695,20 @@ onUnmounted(() => {
 }
 
 .popup-name {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   color: #1a1a1a;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .popup-info {
-  font-size: 16px;
+  font-size: 14px;
   color: #666;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .popup-time {
-  font-size: 14px;
+  font-size: 12px;
   color: #999;
 }
 
@@ -720,18 +729,18 @@ onUnmounted(() => {
 
 /* 滚动条样式 */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: rgba(102, 126, 234, 0.5);
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {

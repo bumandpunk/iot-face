@@ -161,6 +161,6 @@ onUnmounted(() => {
 <style scoped>
 .flow-chart {
   width: 100%;
-  height: 220px;
+  height: 180px;
 }
 </style>
