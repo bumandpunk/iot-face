@@ -168,46 +168,71 @@ const popupData = ref({
 let eventSource = null
 
 const connectSSE = () => {
-  // 开发环境使用代理，生产环境使用完整URL
-  const sseUrl = import.meta.env.MODE === 'development' 
-    ? '/api/sse/connect' 
-    : import.meta.env.VITE_SSE_URL || 'http://10.10.50.2:6160/api/sse/connect'
-  
-  eventSource = new EventSource(sseUrl)
-  
-  eventSource.onopen = () => {
-    console.log('SSE连接成功')
-    isConnected.value = true
-  }
-  
-  // 监听默认消息（没有指定事件类型的消息）
-  eventSource.onmessage = (event) => {
-    console.log('收到SSE消息（默认）:', event.data)
-    try {
-      const data = JSON.parse(event.data)
-      handleSSEMessage(data)
-    } catch (err) {
-      console.error('SSE消息解析失败:', err)
-    }
-  }
-  
-  // 监听特定事件类型: dashboard-data
-  eventSource.addEventListener('dashboard-data', (event) => {
-    console.log('收到dashboard-data消息:', event.data)
-    try {
-      const data = JSON.parse(event.data)
-      handleDashboardData(data)
-    } catch (err) {
-      console.error('dashboard-data消息解析失败:', err)
-    }
-  })
-  
-  eventSource.onerror = (error) => {
-    console.error('SSE连接错误:', error)
+  // 检查浏览器是否支持 EventSource
+  if (typeof EventSource === 'undefined') {
+    console.warn('浏览器不支持 EventSource，将使用模拟数据')
     isConnected.value = false
-    // 5秒后重连
-    setTimeout(connectSSE, 5000)
+    // 使用定时器模拟数据更新
+    startMockDataUpdate()
+    return
   }
+
+  try {
+    // 开发环境使用代理，生产环境使用完整URL
+    const sseUrl = import.meta.env.MODE === 'development' 
+      ? '/api/sse/connect' 
+      : import.meta.env.VITE_SSE_URL || 'http://10.10.50.2:6160/api/sse/connect'
+    
+    eventSource = new EventSource(sseUrl)
+    
+    eventSource.onopen = () => {
+      console.log('SSE连接成功')
+      isConnected.value = true
+    }
+    
+    // 监听默认消息（没有指定事件类型的消息）
+    eventSource.onmessage = (event) => {
+      console.log('收到SSE消息（默认）:', event.data)
+      try {
+        const data = JSON.parse(event.data)
+        handleSSEMessage(data)
+      } catch (err) {
+        console.error('SSE消息解析失败:', err)
+      }
+    }
+    
+    // 监听特定事件类型: dashboard-data
+    eventSource.addEventListener('dashboard-data', (event) => {
+      console.log('收到dashboard-data消息:', event.data)
+      try {
+        const data = JSON.parse(event.data)
+        handleDashboardData(data)
+      } catch (err) {
+        console.error('dashboard-data消息解析失败:', err)
+      }
+    })
+    
+    eventSource.onerror = (error) => {
+      console.error('SSE连接错误:', error)
+      isConnected.value = false
+      // 5秒后重连
+      setTimeout(connectSSE, 5000)
+    }
+  } catch (err) {
+    console.error('EventSource 初始化失败:', err)
+    isConnected.value = false
+    startMockDataUpdate()
+  }
+}
+
+// 模拟数据更新（用于不支持 EventSource 的浏览器）
+const startMockDataUpdate = () => {
+  setInterval(() => {
+    // 随机更新一些数据，模拟实时效果
+    stats.value.currentInside = Math.floor(Math.random() * 20) + 30
+    stats.value.todayIn = Math.floor(Math.random() * 10) + stats.value.todayIn
+    stats.value.todayOut = Math.floor(Math.random() * 10) + stats.value.todayOut
+  }, 10000) // 每10秒更新一次
 }
 
 // 处理SSE消息

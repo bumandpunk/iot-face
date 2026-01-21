@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TV Test Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 48px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .info {
+            background: rgba(255,255,255,0.2);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            max-width: 800px;
+            width: 100%;
+        }
+        .info-item {
+            margin: 15px 0;
+            font-size: 24px;
+        }
+        .success {
+            color: #4ade80;
+            font-weight: bold;
+        }
+        .log {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 18px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>✅ WebView 测试成功</h1>
+    <div class="info">
+        <div class="info-item">📱 User Agent: <span id="ua"></span></div>
+        <div class="info-item">🌐 WebView 版本: <span id="webview"></span></div>
+        <div class="info-item">📊 屏幕尺寸: <span id="screen"></span></div>
+        <div class="info-item">⚡ EventSource 支持: <span id="sse" class="success"></span></div>
+        <div class="info-item">🎨 Canvas 支持: <span id="canvas" class="success"></span></div>
+        <div class="info-item">💾 LocalStorage 支持: <span id="storage" class="success"></span></div>
+        <div class="log" id="log">
+            <div>日志：</div>
+        </div>
+    </div>
+
+    <script>
+        const log = (msg) => {
+            const logEl = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logEl.innerHTML += `<div>[${time}] ${msg}</div>`;
+            console.log(msg);
+        };
+
+        try {
+            // User Agent
+            document.getElementById('ua').textContent = navigator.userAgent;
+            
+            // WebView 版本
+            const match = navigator.userAgent.match(/Chrome\/(\d+)/);
+            document.getElementById('webview').textContent = match ? match[1] : '未知';
+            
+            // 屏幕尺寸
+            document.getElementById('screen').textContent = `${screen.width} × ${screen.height}`;
+            
+            // EventSource 支持
+            const sseSupport = typeof EventSource !== 'undefined';
+            document.getElementById('sse').textContent = sseSupport ? '✓ 支持' : '✗ 不支持';
+            log(`EventSource: ${sseSupport ? '支持' : '不支持'}`);
+            
+            // Canvas 支持
+            const canvas = document.createElement('canvas');
+            const canvasSupport = !!(canvas.getContext && canvas.getContext('2d'));
+            document.getElementById('canvas').textContent = canvasSupport ? '✓ 支持' : '✗ 不支持';
+            log(`Canvas: ${canvasSupport ? '支持' : '不支持'}`);
+            
+            // LocalStorage 支持
+            const storageSupport = typeof localStorage !== 'undefined';
+            document.getElementById('storage').textContent = storageSupport ? '✓ 支持' : '✗ 不支持';
+            log(`LocalStorage: ${storageSupport ? '支持' : '不支持'}`);
+            
+            log('✅ 所有测试完成');
+            
+        } catch (err) {
+            log('❌ 测试出错: ' + err.message);
+        }
+    </script>
+</body>
+</html>
