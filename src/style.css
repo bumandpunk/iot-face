@@ -1,0 +1,32 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow: hidden;
+  /* 电视优化 */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  /* 硬件加速 */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* 针对低配设备的性能优化 */
+@media (max-width: 1920px) {
+  * {
+    /* 减少重绘 */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}

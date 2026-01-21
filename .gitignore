@@ -1,0 +1,56 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node modules
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment variables
+.env
+.env.local
+
+# Android
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+android/captures/
+android/.externalNativeBuild/
+android/.cxx/
+*.apk
+*.aab
+
+# Capacitor
+ios/
+android/app/src/main/assets/public/
+
+# 冗余文档（保留README.md）
+打包完成说明.md
+如何获取APK.md
+APK打包总结.md
+android-build-guide.md
+BUILD.md
+Android_Studio配置步骤.md
+build-apk.sh
+查找APK.sh
+验证gradle.sh
+云端MQTT协议*.docx
