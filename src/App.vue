@@ -415,11 +415,12 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 基础重置 - 防止电视端字体缩放 */
+/* 基础重置 - 强制禁止电视端字体缩放 */
 * {
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
-  text-size-adjust: 100%;
+  -webkit-text-size-adjust: none !important;
+  -ms-text-size-adjust: none !important;
+  text-size-adjust: none !important;
+  box-sizing: border-box;
 }
 
 .dashboard-container {
@@ -432,6 +433,7 @@ onUnmounted(() => {
   overflow: hidden;
   box-sizing: border-box;
   background: linear-gradient(180deg, #E6F1FF 0%, #F5FBFF 99.65%);
+  font-size: 14px;
 }
 
 /* 头部 - 固定高度 */
@@ -439,7 +441,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 30px;
+  padding: 0 24px;
   background-image: url('./assets/images/header-banner.png');
   background-size: cover;
   background-position: center;
@@ -447,7 +449,7 @@ onUnmounted(() => {
   border-radius: 0;
   box-shadow: none;
   flex-shrink: 0;
-  height: 100px;
+  height: 80px;
   position: relative;
 }
 
@@ -459,21 +461,21 @@ onUnmounted(() => {
 .network-status {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 18px;
+  gap: 10px;
+  font-size: 14px;
   color: #000000;
   font-weight: 500;
 }
 
 .network-logo {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
 }
 
 .status-dot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #ccc;
   position: relative;
@@ -511,54 +513,52 @@ onUnmounted(() => {
 .title-wrapper {
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 20px;
   flex: 1;
   justify-content: center;
-  margin-top: -8px;
+  margin-top: -5px;
 }
 
 .title-image {
-  height: 56px;
+  height: 45px;
   width: auto;
   object-fit: contain;
 }
 
 .title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 500;
   color: #000000;
-  letter-spacing: 6px;
+  letter-spacing: 4px;
   white-space: nowrap;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .datetime {
-  font-size: 16px;
+  font-size: 14px;
   color: #000000;
   font-weight: 500;
-  padding: 8px 18px;
+  padding: 6px 14px;
   background: transparent;
-  border-radius: 6px;
+  border-radius: 5px;
 }
 
 /* 主内容区 - 占据剩余空间 */
 .dashboard-content {
   display: grid;
   grid-template-columns: 1.8fr 1fr;
-  gap: 30px;
+  gap: 20px;
   flex: 1;
   overflow: hidden;
   min-height: 0;
-  padding: 20px 30px;
-  padding-left: 30px;
-  padding-right: 30px;
+  padding: 15px 20px;
 }
 
 .section-title {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 500;
   color: #000000;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
   padding-bottom: 0;
   border-bottom: none;
   flex-shrink: 0;
@@ -567,7 +567,7 @@ onUnmounted(() => {
 /* 统计区域 */
 .stats-section {
   background: transparent;
-  padding: 20px 0;
+  padding: 15px 0;
   border-radius: 0;
   box-shadow: none;
   overflow-y: auto;
@@ -579,18 +579,18 @@ onUnmounted(() => {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px 24px;
+  gap: 15px 18px;
   justify-content: start;
   align-content: start;
 }
 
 .stat-card {
   width: 100%;
-  height: 180px; /* 固定高度，适配电视 */
+  height: 140px; /* 减小卡片高度 */
   position: relative;
   background: url('./assets/images/card-bg.png') no-repeat center;
   background-size: cover;
-  border-radius: 12px;
+  border-radius: 10px;
   border: none;
   overflow: hidden;
   box-shadow: 
@@ -639,7 +639,7 @@ onUnmounted(() => {
 /* 特殊卡片：今日域内人员（居中布局，保留图标） */
 .stat-card.card-inside .stat-label {
   left: 50%;
-  top: 22px;
+  top: 16px;
   transform: translateX(-50%);
 }
 
@@ -652,7 +652,7 @@ onUnmounted(() => {
 .stat-card.card-inside .stat-note {
   left: 50%;
   top: auto;
-  bottom: 14px;
+  bottom: 10px;
   transform: translateX(-50%);
   text-align: center;
   max-width: 90%;
@@ -660,9 +660,9 @@ onUnmounted(() => {
 
 .stat-label {
   position: absolute;
-  left: 40.9%;  /* 184/450 ≈ 40.9% */
-  top: 22px;
-  font-size: 18px;
+  left: 40.9%;
+  top: 16px;
+  font-size: 14px;
   color: #000000;
   font-weight: 500;
   white-space: nowrap;
@@ -670,9 +670,9 @@ onUnmounted(() => {
 
 .stat-value-large {
   position: absolute;
-  left: 40.9%;   /* 184/450 */
-  top: 60px;
-  font-size: 42px;
+  left: 40.9%;
+  top: 46px;
+  font-size: 32px;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -684,7 +684,7 @@ onUnmounted(() => {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 52px;
+  font-size: 40px;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -693,18 +693,18 @@ onUnmounted(() => {
 
 .stat-meta {
   position: absolute;
-  left: 40.9%;   /* 184/450 */
-  top: 130px;
-  font-size: 14px;
+  left: 40.9%;
+  top: 100px;
+  font-size: 12px;
   color: #8794A5;
   white-space: nowrap;
 }
 
 .stat-note {
   position: absolute;
-  left: 40.9%;   /* 184/450 */
-  bottom: 14px;
-  font-size: 13px;
+  left: 40.9%;
+  bottom: 10px;
+  font-size: 11px;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -727,7 +727,7 @@ onUnmounted(() => {
 /* 异常记录 */
 .alert-section {
   background: transparent;
-  padding: 20px 0;
+  padding: 15px 0;
   border-radius: 0;
   box-shadow: none;
   overflow: hidden;
@@ -740,7 +740,7 @@ onUnmounted(() => {
 .alert-table {
   flex: 1;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -753,8 +753,8 @@ onUnmounted(() => {
 .alert-table-header {
   display: flex;
   background: #ffffff;
-  padding: 14px 0;
-  font-size: 16px;
+  padding: 10px 0;
+  font-size: 13px;
   font-weight: 400;
   color: #8794A5;
   border-bottom: 2px solid rgba(166, 207, 255, 1);
@@ -768,8 +768,8 @@ onUnmounted(() => {
 
 .alert-table-row {
   display: flex;
-  padding: 12px 0;
-  font-size: 18px;
+  padding: 9px 0;
+  font-size: 14px;
   color: #333;
   border-bottom: 1px solid rgba(166, 207, 255, 0.3);
   transition: background 0.2s;
@@ -784,7 +784,7 @@ onUnmounted(() => {
 }
 
 .alert-col {
-  padding: 0 15px;
+  padding: 0 12px;
   display: flex;
   align-items: center;
 }
@@ -817,9 +817,9 @@ onUnmounted(() => {
 }
 
 .level-badge {
-  padding: 6px 15px;
-  border-radius: 5px;
-  font-size: 15px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -844,24 +844,24 @@ onUnmounted(() => {
 /* 图表区域 - 固定高度 */
 .chart-section {
   background: rgba(255, 255, 255, 0.9);
-  padding: 20px 24px;
-  border-radius: 12px;
+  padding: 15px 18px;
+  border-radius: 10px;
   box-shadow: 
     0 4px 8px rgba(0, 0, 0, 0.1),
     0 2px 4px rgba(0, 0, 0, 0.06);
-  height: 260px;
+  height: 200px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin: 0 30px 20px 30px;
+  margin: 0 20px 15px 20px;
 }
 
 .chart-legend {
   display: flex;
-  gap: 30px;
-  margin-bottom: 14px;
-  font-size: 14px;
+  gap: 24px;
+  margin-bottom: 10px;
+  font-size: 12px;
   flex-shrink: 0;
   color: #8794A5;
 }
@@ -869,12 +869,12 @@ onUnmounted(() => {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .legend-dot {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
 }
