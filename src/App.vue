@@ -415,11 +415,11 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 基础重置 - 强制禁止电视端字体缩放 */
+/* 基础重置 - 使用绝对单位避免缩放 */
 * {
-  -webkit-text-size-adjust: 100% !important;
-  -ms-text-size-adjust: 100% !important;
-  text-size-adjust: 100% !important;
+  -webkit-text-size-adjust: none !important;
+  -ms-text-size-adjust: none !important;
+  text-size-adjust: none !important;
   box-sizing: border-box;
 }
 
@@ -433,7 +433,8 @@ onUnmounted(() => {
   overflow: hidden;
   box-sizing: border-box;
   background: linear-gradient(180deg, #E6F1FF 0%, #F5FBFF 99.65%);
-  font-size: 16px;
+  /* 使用固定像素而不是vw */
+  font-size: 19.2px;
 }
 
 /* 头部 - 使用vh，增加高度 */
@@ -441,7 +442,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 3vw;
+  padding: 0 57.6px;
   background-image: url('./assets/images/header-banner.png');
   background-size: cover;
   background-position: center;
@@ -461,21 +462,21 @@ onUnmounted(() => {
 .network-status {
   display: flex;
   align-items: center;
-  gap: 1vw;
-  font-size: 1.1vw;
+  gap: 19.2px;
+  font-size: 21.1px;
   color: #000000;
   font-weight: 500;
 }
 
 .network-logo {
-  width: 2.2vw;
-  height: 2.2vw;
+  width: 42.2px;
+  height: 42.2px;
   object-fit: contain;
 }
 
 .status-dot {
-  width: 0.8vw;
-  height: 0.8vw;
+  width: 15.4px;
+  height: 15.4px;
   border-radius: 50%;
   background: #ccc;
   position: relative;
@@ -513,7 +514,7 @@ onUnmounted(() => {
 .title-wrapper {
   display: flex;
   align-items: center;
-  gap: 1.2vw;
+  gap: 23px;
   flex: 1;
   justify-content: center;
   margin-top: 0;
@@ -526,19 +527,19 @@ onUnmounted(() => {
 }
 
 .title {
-  font-size: 2vw;
+  font-size: 38.4px;
   font-weight: 500;
   color: #000000;
-  letter-spacing: 0.4vw;
+  letter-spacing: 7.7px;
   white-space: nowrap;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .datetime {
-  font-size: 1vw;
+  font-size: 19.2px;
   color: #000000;
   font-weight: 500;
-  padding: 0.6vh 1.2vw;
+  padding: 0.6vh 23px;
   background: transparent;
   border-radius: 0.5vh;
 }
@@ -546,15 +547,15 @@ onUnmounted(() => {
 /* 主内容区 - 增加gap，让卡片和表格有间距 */
 .dashboard-content {
   display: flex;
-  gap: 2vw;
+  gap: 38.4px;
   flex: 1;
   overflow: hidden;
   min-height: 0;
-  padding: 2vh 3vw;
+  padding: 2vh 57.6px;
 }
 
 .section-title {
-  font-size: 1.2vw;
+  font-size: 23px;
   font-weight: 500;
   color: #000000;
   margin-bottom: 1.5vh;
@@ -581,13 +582,13 @@ onUnmounted(() => {
 .stats-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 2.2vh 1.5vw;
+  gap: 2.2vh 28.8px;
   justify-content: space-between;
   align-content: flex-start;
 }
 
 .stats-grid > .stat-card {
-  width: calc(50% - 0.75vw);
+  width: calc(50% - 14.4px);
   flex-shrink: 0;
 }
 
@@ -668,7 +669,7 @@ onUnmounted(() => {
   position: absolute;
   left: 40.9%;
   top: 12%;
-  font-size: 1vw;
+  font-size: 19.2px;
   color: #000000;
   font-weight: 500;
   white-space: nowrap;
@@ -678,7 +679,7 @@ onUnmounted(() => {
   position: absolute;
   left: 40.9%;
   top: 32%;
-  font-size: 2.4vw;
+  font-size: 46.1px;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -690,7 +691,7 @@ onUnmounted(() => {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 3.2vw;
+  font-size: 61.4px;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -701,7 +702,7 @@ onUnmounted(() => {
   position: absolute;
   left: 40.9%;
   top: 68%;
-  font-size: 0.8vw;
+  font-size: 15.4px;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -710,7 +711,7 @@ onUnmounted(() => {
   position: absolute;
   left: 40.9%;
   bottom: 8%;
-  font-size: 0.75vw;
+  font-size: 14.4px;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -763,7 +764,7 @@ onUnmounted(() => {
   display: flex;
   background: #ffffff;
   padding: 1.2vh 0;
-  font-size: 0.9vw;
+  font-size: 17.3px;
   font-weight: 400;
   color: #8794A5;
   border-bottom: 0.2vh solid rgba(166, 207, 255, 1);
@@ -786,7 +787,7 @@ onUnmounted(() => {
 .alert-table-row {
   display: flex;
   padding: 1vh 0;
-  font-size: 0.95vw;
+  font-size: 18.2px;
   color: #333;
   border-bottom: 0.1vh solid rgba(166, 207, 255, 0.3);
   transition: background 0.2s;
@@ -802,7 +803,7 @@ onUnmounted(() => {
 }
 
 .alert-col {
-  padding: 0 1vw;
+  padding: 0 19.2px;
   display: flex;
   align-items: center;
 }
@@ -835,9 +836,9 @@ onUnmounted(() => {
 }
 
 .level-badge {
-  padding: 0.5vh 1vw;
+  padding: 0.5vh 19.2px;
   border-radius: 0.5vh;
-  font-size: 0.9vw;
+  font-size: 17.3px;
   font-weight: 500;
 }
 
@@ -862,7 +863,7 @@ onUnmounted(() => {
 /* 图表区域 - 调整图例间距和字体 */
 .chart-section {
   background: rgba(255, 255, 255, 0.9);
-  padding: 1.5vh 2vw;
+  padding: 1.5vh 38.4px;
   border-radius: 1vh;
   box-shadow: 
     0 0.4vh 0.8vh rgba(0, 0, 0, 0.1),
@@ -872,14 +873,14 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin: 0 3vw 2vh 3vw;
+  margin: 0 57.6px 2vh 57.6px;
 }
 
 .chart-legend {
   display: flex;
-  gap: 3vw;
+  gap: 57.6px;
   margin-bottom: 1vh;
-  font-size: 0.9vw;
+  font-size: 17.3px;
   flex-shrink: 0;
   color: #8794A5;
 }
@@ -887,12 +888,12 @@ onUnmounted(() => {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 0.8vw;
+  gap: 15.4px;
 }
 
 .legend-dot {
-  width: 0.9vw;
-  height: 0.9vw;
+  width: 17.3px;
+  height: 17.3px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -1037,18 +1038,18 @@ onUnmounted(() => {
 
 /* 滚动条样式 - 稍微大一点 */
 ::-webkit-scrollbar {
-  width: 0.5vw;
+  width: 9.6px;
   height: 0.5vh;
 }
 
 ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.04);
-  border-radius: 0.25vw;
+  border-radius: 4.8px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: rgba(102, 126, 234, 0.3);
-  border-radius: 0.25vw;
+  border-radius: 4.8px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -1082,7 +1083,7 @@ onUnmounted(() => {
   
   .title {
     font-size: 18px;
-    letter-spacing: 0.1vw;
+    letter-spacing: 1.9px;
   }
   
   .datetime {

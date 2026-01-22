@@ -2,13 +2,13 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1920, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>3017门禁域空间分析</title>
   <style>
     * {
-      -webkit-text-size-adjust: 100% !important;
-      -ms-text-size-adjust: 100% !important;
-      text-size-adjust: 100% !important;
+      -webkit-text-size-adjust: none !important;
+      -ms-text-size-adjust: none !important;
+      text-size-adjust: none !important;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
@@ -17,8 +17,6 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      /* 强制固定 viewport 宽度 */
-      min-width: 1920px;
     }
     body {
       margin: 0;
@@ -27,9 +25,13 @@
       height: 100%;
       overflow: hidden;
       font-size: 16px !important;
-      /* 禁用 Android 系统字体缩放 */
-      -webkit-transform: scale(1) !important;
-      transform: scale(1) !important;
+      /* 使用CSS变量作为基准 */
+      --base-font-size: 16px;
+    }
+    
+    /* 强制所有文字使用固定基准 */
+    body, body * {
+      font-size: inherit;
     }
   </style>
 </head>
