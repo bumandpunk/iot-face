@@ -48,23 +48,25 @@ const initChart = () => {
         boundaryGap: false,
         axisLine: {
           lineStyle: {
-            color: '#ccc'
+            color: 'rgba(166, 207, 255, 1)'
           }
         },
         axisLabel: {
-          color: '#666'
+          color: '#8794A5',
+          fontSize: 14
         }
       },
       yAxis: {
         type: 'value',
         splitLine: {
           lineStyle: {
-            color: '#eee',
+            color: 'rgba(166, 207, 255, 0.3)',
             type: 'dashed'
           }
         },
         axisLabel: {
-          color: '#666'
+          color: '#8794A5',
+          fontSize: 14
         }
       },
       series: [
@@ -74,11 +76,11 @@ const initChart = () => {
           data: props.chartData.inside,
           smooth: true,
           lineStyle: {
-            color: '#ff7f50',
+            color: '#FF7F50',
             width: 3
           },
           itemStyle: {
-            color: '#ff7f50'
+            color: '#FF7F50'
           },
           areaStyle: {
             color: {
@@ -100,12 +102,12 @@ const initChart = () => {
           data: props.chartData.enter,
           smooth: true,
           lineStyle: {
-            color: '#4a90e2',
+            color: '#1F7FED',
             width: 3,
             type: 'dashed'
           },
           itemStyle: {
-            color: '#4a90e2'
+            color: '#1F7FED'
           }
         },
         {
@@ -114,12 +116,12 @@ const initChart = () => {
           data: props.chartData.exit,
           smooth: true,
           lineStyle: {
-            color: '#52c41a',
+            color: '#00BD4B',
             width: 3,
             type: 'dashed'
           },
           itemStyle: {
-            color: '#52c41a'
+            color: '#00BD4B'
           }
         }
       ]

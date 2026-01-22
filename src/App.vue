@@ -3,13 +3,12 @@
     <!-- 头部标题栏 -->
     <header class="dashboard-header">
       <div class="network-status">
+        <img src="./assets/images/logo-network.png" alt="logo" class="network-logo" />
         <span class="status-dot" :class="{ active: isConnected }"></span>
         <span>捷租生态网络已覆盖</span>
       </div>
       <div class="title-wrapper">
-        <div class="title-decoration left"></div>
-        <h1 class="title">3107门神域空间分析</h1>
-        <div class="title-decoration right"></div>
+        <img src="./assets/images/title-text.png" alt="3107门神域空间分析" class="title-image" />
       </div>
       <div class="datetime">{{ currentTime }}</div>
     </header>
@@ -21,7 +20,7 @@
         <h2 class="section-title">空间实时数据</h2>
         <div class="stats-grid">
           <!-- 出勤统计 -->
-          <div class="stat-card">
+          <div class="stat-card card-attendance">
             <div class="stat-label">今日 应到岗/实到岗 人数</div>
             <div class="stat-value-large">{{ stats.expectedCount }} / {{ stats.actualCount }}</div>
             <div class="stat-meta">
@@ -30,9 +29,9 @@
           </div>
 
           <!-- 空间使用率 -->
-          <div class="stat-card">
+          <div class="stat-card card-space">
             <div class="stat-label">今日空间使用率</div>
-            <div class="stat-value-large highlight">{{ stats.spaceUsageRate }}%</div>
+            <div class="stat-value-large">{{ stats.spaceUsageRate }}%</div>
             <div class="stat-meta">
               较昨日 <span class="positive">+{{ stats.rateChange }}%</span> | 峰值 <span>{{ stats.peakRate }}%</span>
             </div>
@@ -40,17 +39,14 @@
           </div>
 
           <!-- 在域内人员 -->
-          <div class="stat-card">
+          <div class="stat-card card-inside">
             <div class="stat-label">今日域内人员</div>
             <div class="stat-value-medium">{{ stats.currentInside }}</div>
-            <div class="stat-chart-mini">
-              <span class="chart-bar" v-for="(val, idx) in stats.insideHistory" :key="idx" :style="{ height: val + '%' }"></span>
-            </div>
             <div class="stat-note">PS：域内人员：职工、拜访者、面试者等</div>
           </div>
 
           <!-- 进出总次数 -->
-          <div class="stat-card">
+          <div class="stat-card card-inout">
             <div class="stat-label">今日进出总人次</div>
             <div class="stat-value-large">{{ stats.totalInOut }}</div>
             <div class="stat-meta">
@@ -98,16 +94,9 @@
     <!-- 人员进出弹窗 -->
     <transition name="popup">
       <div class="person-popup" v-if="showPopup">
-        <!-- 装饰角 -->
-        <div class="popup-corner corner-top-left"></div>
-        <div class="popup-corner corner-top-right"></div>
-        <div class="popup-corner corner-bottom-left"></div>
-        <div class="popup-corner corner-bottom-right"></div>
-        
         <div class="popup-content" :class="popupData.type">
           <!-- 头像区域 -->
           <div class="popup-avatar-wrapper">
-            <div class="popup-avatar-border"></div>
             <div class="popup-avatar">
               <img :src="popupData.avatar" alt="avatar" />
             </div>
@@ -136,7 +125,6 @@
     </transition>
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import FlowChart from './components/FlowChart.vue'
@@ -430,12 +418,13 @@ onUnmounted(() => {
 .dashboard-container {
   width: 100vw;
   height: 100vh;
-  padding: 1.5vh 1.5vw;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.5vh;
+  gap: 0;
   overflow: hidden;
   box-sizing: border-box;
+  background: linear-gradient(180deg, #E6F1FF 0%, #F5FBFF 99.65%);
 }
 
 /* 头部 - 固定高度 */
@@ -443,20 +432,36 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5vh 2vw;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 1vh;
-  box-shadow: 0 0.3vh 1vh rgba(0, 0, 0, 0.1);
+  padding: 0 2vw;
+  background-image: url('./assets/images/header-banner.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 0;
+  box-shadow: none;
   flex-shrink: 0;
-  height: 7vh;
+  height: clamp(80px, 11vh, 120px);
+  position: relative;
+}
+
+.dashboard-header::before,
+.dashboard-header::after {
+  display: none;
 }
 
 .network-status {
   display: flex;
   align-items: center;
   gap: 0.8vw;
-  font-size: 1.8vh;
-  color: #666;
+  font-size: clamp(12px, 1.6vh, 16px);
+  color: #000000;
+  font-weight: 500;
+}
+
+.network-logo {
+  width: clamp(24px, 3vh, 32px);
+  height: clamp(24px, 3vh, 32px);
+  object-fit: contain;
 }
 
 .status-dot {
@@ -492,63 +497,40 @@ onUnmounted(() => {
   }
 }
 
+.title-decoration {
+  display: none;
+}
+
 .title-wrapper {
   display: flex;
   align-items: center;
   gap: 2vw;
   flex: 1;
   justify-content: center;
+  margin-top: -1vh;
 }
 
-.title-decoration {
-  width: 15vw;
-  height: 0.3vh;
-  background: linear-gradient(90deg, transparent, #4a90e2, transparent);
-  position: relative;
-}
-
-.title-decoration::before,
-.title-decoration::after {
-  content: '';
-  position: absolute;
-  width: 1vh;
-  height: 1vh;
-  background: #4a90e2;
-  border-radius: 50%;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.title-decoration.left::before {
-  left: 0;
-}
-
-.title-decoration.left::after {
-  right: 0;
-}
-
-.title-decoration.right::before {
-  left: 0;
-}
-
-.title-decoration.right::after {
-  right: 0;
+.title-image {
+  height: clamp(40px, 5.5vh, 60px);
+  width: auto;
+  object-fit: contain;
 }
 
 .title {
-  font-size: 3vh;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-size: clamp(20px, 2.8vh, 30px);
+  font-weight: 500;
+  color: #000000;
   letter-spacing: 0.3vw;
   white-space: nowrap;
-  text-shadow: 0 0.2vh 0.5vh rgba(74, 144, 226, 0.3);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .datetime {
-  font-size: 1.8vh;
-  color: #666;
+  font-size: clamp(12px, 1.6vh, 16px);
+  color: #000000;
+  font-weight: 500;
   padding: 0.8vh 1.2vw;
-  background: #f5f5f5;
+  background: transparent;
   border-radius: 0.6vh;
 }
 
@@ -560,25 +542,25 @@ onUnmounted(() => {
   flex: 1;
   overflow: hidden;
   min-height: 0;
-  max-height: calc(100vh - 36vh); /* 头部7vh + 图表27vh + 间距2vh */
+  padding: 1.5vh 1.5vw;
 }
 
 .section-title {
-  font-size: 2.2vh;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-size: clamp(16px, 2vh, 20px);
+  font-weight: 500;
+  color: #000000;
   margin-bottom: 1.5vh;
-  padding-bottom: 0.8vh;
-  border-bottom: 0.3vh solid #667eea;
+  padding-bottom: 0;
+  border-bottom: none;
   flex-shrink: 0;
 }
 
 /* 统计区域 */
 .stats-section {
-  background: rgba(255, 255, 255, 0.95);
+  background: transparent;
   padding: 2vh 1.5vw;
-  border-radius: 1.2vh;
-  box-shadow: 0 0.3vh 1vh rgba(0, 0, 0, 0.1);
+  border-radius: 0;
+  box-shadow: none;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -588,98 +570,145 @@ onUnmounted(() => {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.5vw 1.2vw;
-  flex: 1;
+  gap: 2vh 1.5vw;
+  justify-content: start;
+  align-content: start;
 }
 
 .stat-card {
-  padding: 2vh 1.5vw;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  width: 100%;
+  height: 0;
+  padding-bottom: 42.67%; /* 192/450 = 42.67% 保持宽高比 */
+  position: relative;
+  background: url('./assets/images/card-bg.png') no-repeat center;
+  background-size: cover;
   border-radius: 1.2vh;
-  border: 0.3vh solid #e1e8ed;
-  display: flex;
-  flex-direction: column;
+  border: none;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  left: 5.3%;  /* 24/450 ≈ 5.3% */
+  top: 12.5%;  /* 24/192 ≈ 12.5% */
+  width: 32%;  /* 144/450 = 32% */
+  height: 75%; /* 144/192 = 75% */
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.stat-card.card-attendance::before {
+  background-image: url('./assets/images/icon-attendance.png');
+}
+
+.stat-card.card-space::before {
+  background-image: url('./assets/images/icon-space.png');
+}
+
+.stat-card.card-inside::before {
+  background-image: url('./assets/images/icon-inside.png');
+}
+
+.stat-card.card-inout::before {
+  background-image: url('./assets/images/icon-inout.png');
+}
+
+/* 特殊卡片：今日域内人员（居中布局，保留图标） */
+.stat-card.card-inside .stat-label {
+  left: 50%;
+  top: 12.5%;
+  transform: translateX(-50%);
+}
+
+.stat-card.card-inside .stat-value-medium {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.stat-card.card-inside .stat-note {
+  left: 50%;
+  top: auto;
+  bottom: 7.3%;
+  transform: translateX(-50%);
+  text-align: center;
+  max-width: 90%;
 }
 
 .stat-label {
-  font-size: 1.8vh;
-  color: #666;
-  margin-bottom: 1vh;
-  flex-shrink: 0;
+  position: absolute;
+  left: 40.9%;  /* 184/450 ≈ 40.9% */
+  top: 12.5%;   /* 24/192 ≈ 12.5% */
+  font-size: clamp(14px, 1.8vh, 20px);
+  color: #000000;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .stat-value-large {
-  font-size: 4.5vh;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 1vh 0;
-  flex-shrink: 0;
+  position: absolute;
+  left: 40.9%;   /* 184/450 */
+  top: 33.9%;    /* 65/192 */
+  font-size: clamp(28px, 4.5vh, 50px);
+  font-weight: 400;
+  color: #1F7FED;
   line-height: 1.2;
+  font-family: 'YouSheBiaoTiYuan', -apple-system, sans-serif;
 }
 
 .stat-value-medium {
-  font-size: 6vh;
-  font-weight: 700;
-  color: #667eea;
-  margin: 1.5vh 0;
-  text-align: center;
-  flex-shrink: 0;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(35px, 6vh, 65px);
+  font-weight: 400;
+  color: #1F7FED;
   line-height: 1.2;
+  font-family: 'YouSheBiaoTiYuan', -apple-system, sans-serif;
 }
 
 .stat-meta {
-  font-size: 1.6vh;
-  color: #666;
-  margin-top: 1vh;
-  flex-shrink: 0;
+  position: absolute;
+  left: 40.9%;   /* 184/450 */
+  top: 71.9%;    /* 138/192 */
+  font-size: clamp(12px, 1.4vh, 14px);
+  color: #8794A5;
+  white-space: nowrap;
 }
 
 .stat-note {
-  font-size: 1.4vh;
-  color: #999;
-  margin-top: 0.6vh;
-  flex-shrink: 0;
+  position: absolute;
+  left: 40.9%;   /* 184/450 */
+  bottom: 7.3%;  /* 14/192 */
+  font-size: clamp(11px, 1.3vh, 14px);
+  color: #8794A5;
+  white-space: nowrap;
 }
 
 .highlight {
-  color: #667eea;
+  color: #1F7FED;
   font-weight: 600;
 }
 
 .warning {
-  color: #ff4d4f;
+  color: #D43030;
   font-weight: 600;
 }
 
 .positive {
-  color: #52c41a;
+  color: #00BD4B;
   font-weight: 600;
-}
-
-/* 迷你图表 */
-.stat-chart-mini {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  height: 4vh;
-  margin: 1.2vh 0;
-  gap: 0.3vw;
-  flex-shrink: 0;
-}
-
-.chart-bar {
-  flex: 1;
-  background: #667eea;
-  border-radius: 0.3vh;
-  min-height: 0.6vh;
 }
 
 /* 异常记录 */
 .alert-section {
-  background: rgba(255, 255, 255, 0.95);
+  background: transparent;
   padding: 2vh 1.5vw;
-  border-radius: 1.2vh;
-  box-shadow: 0 0.3vh 1vh rgba(0, 0, 0, 0.1);
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -689,22 +718,22 @@ onUnmounted(() => {
 /* 异常告警表格 */
 .alert-table {
   flex: 1;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 1vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  border: 0.1vh solid #e8e8e8;
+  border: 0.1vh solid rgba(166, 207, 255, 0.5);
 }
 
 .alert-table-header {
   display: flex;
-  background: #f5f7fa;
+  background: #ffffff;
   padding: 1.2vh 0;
-  font-size: 1.6vh;
-  font-weight: 600;
-  color: #666;
-  border-bottom: 0.2vh solid #e8e8e8;
+  font-size: clamp(12px, 1.6vh, 16px);
+  font-weight: 400;
+  color: #8794A5;
+  border-bottom: 0.15vh solid rgba(166, 207, 255, 1);
 }
 
 .alert-table-body {
@@ -716,9 +745,9 @@ onUnmounted(() => {
 .alert-table-row {
   display: flex;
   padding: 1vh 0;
-  font-size: 1.5vh;
+  font-size: clamp(14px, 1.8vh, 20px);
   color: #333;
-  border-bottom: 0.1vh solid #f0f0f0;
+  border-bottom: 0.1vh solid rgba(166, 207, 255, 0.3);
   transition: background 0.2s;
 }
 
@@ -737,14 +766,16 @@ onUnmounted(() => {
 }
 
 .col-index {
-  width: 10%;
+  width: 12%;
   justify-content: center;
-  color: #999;
+  color: #000000;
+  font-weight: 500;
 }
 
 .col-time {
   width: 35%;
-  color: #666;
+  color: #000000;
+  font-weight: 400;
 }
 
 .col-level {
@@ -754,53 +785,56 @@ onUnmounted(() => {
 
 .col-detail {
   width: 35%;
-  color: #333;
+  color: #000000;
+  font-weight: 400;
 }
 
 .level-badge {
   padding: 0.4vh 1vw;
   border-radius: 0.4vh;
-  font-size: 1.4vh;
+  font-size: clamp(12px, 1.5vh, 16px);
   font-weight: 500;
 }
 
 .level-badge.warning {
-  background: #fff7e6;
-  color: #fa8c16;
-  border: 0.1vh solid #ffd591;
+  background: transparent;
+  color: #E0B116;
+  border: none;
 }
 
 .level-badge.danger {
-  background: #fff1f0;
-  color: #ff4d4f;
-  border: 0.1vh solid #ffccc7;
+  background: transparent;
+  color: #D43030;
+  border: none;
 }
 
 .level-badge.info {
-  background: #e6f7ff;
-  color: #1890ff;
-  border: 0.1vh solid #91d5ff;
+  background: transparent;
+  color: #00BD4B;
+  border: none;
 }
 
 /* 图表区域 - 固定高度 */
 .chart-section {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.9);
   padding: 2vh 1.5vw;
   border-radius: 1.2vh;
-  box-shadow: 0 0.3vh 1vh rgba(0, 0, 0, 0.1);
+  box-shadow: none;
   height: 27vh;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  margin: 0 1.5vw 1.5vh;
 }
 
 .chart-legend {
   display: flex;
   gap: 2vw;
   margin-bottom: 1.2vh;
-  font-size: 1.8vh;
+  font-size: clamp(12px, 1.4vh, 14px);
   flex-shrink: 0;
+  color: #8794A5;
 }
 
 .legend-item {
@@ -817,15 +851,15 @@ onUnmounted(() => {
 }
 
 .legend-dot.orange {
-  background: #ff7f50;
+  background: #FF7F50;
 }
 
 .legend-dot.blue {
-  background: #4a90e2;
+  background: #1F7FED;
 }
 
 .legend-dot.green {
-  background: #52c41a;
+  background: #00BD4B;
 }
 
 /* 弹窗 */
@@ -835,99 +869,41 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(230, 241, 255, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 
-/* 装饰角 */
-.popup-corner {
-  position: absolute;
-  width: 8vh;
-  height: 8vh;
-  border: 0.5vh solid #4a90e2;
-  z-index: 1001;
-}
-
-.corner-top-left {
-  top: 15vh;
-  left: 25vw;
-  border-right: none;
-  border-bottom: none;
-}
-
-.corner-top-right {
-  top: 15vh;
-  right: 25vw;
-  border-left: none;
-  border-bottom: none;
-}
-
-.corner-bottom-left {
-  bottom: 15vh;
-  left: 25vw;
-  border-right: none;
-  border-top: none;
-}
-
-.corner-bottom-right {
-  bottom: 15vh;
-  right: 25vw;
-  border-left: none;
-  border-top: none;
-}
-
 .popup-content {
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
-  padding: 5vh 6vw;
-  border-radius: 1.5vh;
+  background: #ffffff;
+  padding: 4vh 5vw 3vh;
+  border-radius: 1.2vh;
   text-align: center;
-  min-width: 45vw;
-  max-width: 50vw;
-  box-shadow: 0 2vh 6vh rgba(0, 0, 0, 0.4);
+  min-width: 40vw;
+  max-width: 45vw;
+  box-shadow: 0 0.5vh 2vh rgba(31, 127, 237, 0.2);
   position: relative;
-  z-index: 1002;
+  border: 0.2vh solid rgba(166, 207, 255, 0.3);
 }
 
 /* 头像区域 */
 .popup-avatar-wrapper {
   position: relative;
-  width: 24vh;
-  height: 24vh;
-  margin: 0 auto 3vh;
-}
-
-.popup-avatar-border {
-  position: absolute;
-  top: -1vh;
-  left: -1vh;
-  right: -1vh;
-  bottom: -1vh;
-  border: 0.5vh solid #4a90e2;
-  border-radius: 0.8vh;
-  animation: borderPulse 2s infinite;
-}
-
-@keyframes borderPulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.02);
-  }
+  width: 20vh;
+  height: 20vh;
+  margin: 0 auto 2.5vh;
 }
 
 .popup-avatar {
   width: 100%;
   height: 100%;
-  border-radius: 0.6vh;
+  border: 0.4vh solid #1F7FED;
+  border-radius: 0.8vh;
   overflow: hidden;
   background: #000;
-  box-shadow: 0 0.5vh 2vh rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0.3vh 1vh rgba(31, 127, 237, 0.3);
 }
 
 .popup-avatar img {
@@ -938,67 +914,63 @@ onUnmounted(() => {
 
 /* 欢迎信息 */
 .popup-welcome {
-  font-size: 3.5vh;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 3vh;
-  line-height: 1.6;
+  font-size: 3.2vh;
+  font-weight: 500;
+  color: #000000;
+  margin-bottom: 2.5vh;
+  line-height: 1.5;
 }
 
 .popup-name {
-  color: #1a1a1a;
+  color: #000000;
 }
 
 .popup-action {
-  color: #1a1a1a;
+  color: #000000;
 }
 
 .popup-location {
-  color: #4a90e2;
-  font-weight: 700;
+  color: #1F7FED;
+  font-weight: 600;
 }
 
 /* 底部信息 */
 .popup-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   padding-top: 2vh;
-  border-top: 0.2vh solid rgba(0, 0, 0, 0.1);
+  gap: 3vw;
 }
 
 .popup-footer-item {
   display: flex;
-  align-items: center;
-  gap: 1vw;
+  align-items: baseline;
+  gap: 0.5vw;
 }
 
 .popup-footer-label {
-  font-size: 1.8vh;
-  color: #999;
+  font-size: 1.6vh;
+  color: #8794A5;
 }
 
 .popup-footer-value {
-  font-size: 2.2vh;
+  font-size: 1.8vh;
   font-weight: 600;
-  color: #4a90e2;
+  color: #1F7FED;
 }
 
 /* 进入和退出的不同样式 */
-.popup-content.enter .popup-avatar-border {
-  border-color: #4a90e2;
-}
-
-.popup-content.exit .popup-avatar-border {
-  border-color: #ff6b6b;
+.popup-content.exit .popup-avatar {
+  border-color: #D43030;
 }
 
 .popup-content.exit .popup-location {
-  color: #ff6b6b;
+  color: #D43030;
 }
 
 .popup-content.exit .popup-footer-value {
-  color: #ff6b6b;
+  color: #D43030;
 }
 
 /* 弹窗动画 */
@@ -1035,4 +1007,44 @@ onUnmounted(() => {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(102, 126, 234, 0.8);
 }
+
+/* 响应式布局 - 平板和小屏幕 */
+@media (max-width: 1366px) {
+  .dashboard-content {
+    grid-template-columns: 1fr;
+    gap: 2vh;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .chart-section {
+    height: 30vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .network-status span:not(.status-dot) {
+    display: none;
+  }
+  
+  .title-image {
+    height: clamp(28px, 4vh, 42px);
+  }
+  
+  .title {
+    font-size: 18px;
+    letter-spacing: 0.1vw;
+  }
+  
+  .datetime {
+    font-size: 12px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 </style>
