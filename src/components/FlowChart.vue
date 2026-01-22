@@ -53,7 +53,7 @@ const initChart = () => {
         },
         axisLabel: {
           color: '#8794A5',
-          fontSize: 14
+          fontSize: 11
         }
       },
       yAxis: {
@@ -66,7 +66,7 @@ const initChart = () => {
         },
         axisLabel: {
           color: '#8794A5',
-          fontSize: 14
+          fontSize: 11
         }
       },
       series: [

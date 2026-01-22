@@ -461,21 +461,21 @@ onUnmounted(() => {
 .network-status {
   display: flex;
   align-items: center;
-  gap: 0.6vw;
-  font-size: 1vw;
+  gap: 1vw;
+  font-size: 1.1vw;
   color: #000000;
   font-weight: 500;
 }
 
 .network-logo {
-  width: 2vw;
-  height: 2vw;
+  width: 2.2vw;
+  height: 2.2vw;
   object-fit: contain;
 }
 
 .status-dot {
-  width: 0.7vw;
-  height: 0.7vw;
+  width: 0.8vw;
+  height: 0.8vw;
   border-radius: 50%;
   background: #ccc;
   position: relative;
@@ -543,7 +543,7 @@ onUnmounted(() => {
   border-radius: 0.5vh;
 }
 
-/* 主内容区 - 增加左右边距 */
+/* 主内容区 - 增加gap，让卡片和表格有间距 */
 .dashboard-content {
   display: flex;
   gap: 2vw;
@@ -563,7 +563,7 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-/* 统计区域 - 调整为65% */
+/* 统计区域 - 保持65% */
 .stats-section {
   background: transparent;
   padding: 0;
@@ -581,7 +581,7 @@ onUnmounted(() => {
 .stats-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.8vh 1.5vw;
+  gap: 2.2vh 1.5vw;
   justify-content: space-between;
   align-content: flex-start;
 }
@@ -859,7 +859,7 @@ onUnmounted(() => {
   border: none;
 }
 
-/* 图表区域 - 增加高度和边距 */
+/* 图表区域 - 调整图例间距和字体 */
 .chart-section {
   background: rgba(255, 255, 255, 0.9);
   padding: 1.5vh 2vw;
@@ -867,7 +867,7 @@ onUnmounted(() => {
   box-shadow: 
     0 0.4vh 0.8vh rgba(0, 0, 0, 0.1),
     0 0.2vh 0.4vh rgba(0, 0, 0, 0.06);
-  height: 24vh;
+  height: 18vh;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -877,8 +877,8 @@ onUnmounted(() => {
 
 .chart-legend {
   display: flex;
-  gap: 2vw;
-  margin-bottom: 1.2vh;
+  gap: 3vw;
+  margin-bottom: 1vh;
   font-size: 0.9vw;
   flex-shrink: 0;
   color: #8794A5;
@@ -887,7 +887,7 @@ onUnmounted(() => {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 0.6vw;
+  gap: 0.8vw;
 }
 
 .legend-dot {
