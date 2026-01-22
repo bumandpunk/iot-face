@@ -453,7 +453,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.8vw;
-  font-size: clamp(12px, 1.6vh, 16px);
+  font-size: clamp(16px, 1.8vh, 18px);
   color: #000000;
   font-weight: 500;
 }
@@ -526,7 +526,7 @@ onUnmounted(() => {
 }
 
 .datetime {
-  font-size: clamp(12px, 1.6vh, 16px);
+  font-size: clamp(16px, 1.6vh, 16px);
   color: #000000;
   font-weight: 500;
   padding: 0.8vh 1.2vw;
@@ -537,12 +537,14 @@ onUnmounted(() => {
 /* 主内容区 - 占据剩余空间 */
 .dashboard-content {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 1.5vw;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 2vw;
   flex: 1;
   overflow: hidden;
   min-height: 0;
   padding: 1.5vh 1.5vw;
+  padding-left: 1.5vw;
+  padding-right: 1.5vw;
 }
 
 .section-title {
@@ -558,7 +560,7 @@ onUnmounted(() => {
 /* 统计区域 */
 .stats-section {
   background: transparent;
-  padding: 2vh 1.5vw;
+  padding: 2vh 0;
   border-radius: 0;
   box-shadow: none;
   overflow-y: auto;
@@ -585,6 +587,19 @@ onUnmounted(() => {
   border-radius: 1.2vh;
   border: none;
   overflow: hidden;
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 16px rgba(0, 0, 0, 0.15),
+    0 4px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .stat-card::before {
@@ -706,7 +721,7 @@ onUnmounted(() => {
 /* 异常记录 */
 .alert-section {
   background: transparent;
-  padding: 2vh 1.5vw;
+  padding: 2vh 0;
   border-radius: 0;
   box-shadow: none;
   overflow: hidden;
@@ -724,6 +739,9 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   border: 0.1vh solid rgba(166, 207, 255, 0.5);
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
 .alert-table-header {
@@ -767,24 +785,27 @@ onUnmounted(() => {
 
 .col-index {
   width: 12%;
+  min-width: 60px;
   justify-content: center;
   color: #000000;
   font-weight: 500;
 }
 
 .col-time {
-  width: 35%;
+  width: 30%;
   color: #000000;
   font-weight: 400;
 }
 
 .col-level {
-  width: 20%;
+  width: 22%;
+  min-width: 80px;
   justify-content: center;
+  white-space: nowrap;
 }
 
 .col-detail {
-  width: 35%;
+  width: 36%;
   color: #000000;
   font-weight: 400;
 }
@@ -819,13 +840,15 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.9);
   padding: 2vh 1.5vw;
   border-radius: 1.2vh;
-  box-shadow: none;
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.06);
   height: 27vh;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin: 0 1.5vw 1.5vh;
+  margin: 0 1.5vw 1.5vh 1.5vw;
 }
 
 .chart-legend {
@@ -1039,7 +1062,7 @@ onUnmounted(() => {
   }
   
   .datetime {
-    font-size: 12px;
+    font-size: 16px;
   }
   
   .stats-grid {
