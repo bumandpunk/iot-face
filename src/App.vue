@@ -599,7 +599,7 @@ onUnmounted(() => {
   border-radius: 1vh;
   border: none;
   overflow: hidden;
-  margin-bottom:30px;
+  margin-bottom:20px;
   box-shadow: 
     0 0.4vh 0.8vh rgba(0, 0, 0, 0.1),
     0 0.2vh 0.4vh rgba(0, 0, 0, 0.06),
@@ -736,8 +736,9 @@ onUnmounted(() => {
   flex-direction: column;
   min-height: 0;
   max-height: 100%;
-  width: 33%;
+  width: 31%;
   flex-shrink: 0;
+  margin-left: 25px;
 }
 
 /* 异常告警表格 - 控制高度，只显示5条数据 */
