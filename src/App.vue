@@ -449,7 +449,7 @@ onUnmounted(() => {
   border-radius: 0;
   box-shadow: none;
   flex-shrink: 0;
-  height: 70px;
+  height: 75px;
   position: relative;
 }
 
@@ -520,7 +520,7 @@ onUnmounted(() => {
 }
 
 .title-image {
-  height: 38px;
+  height: 40px;
   width: auto;
   object-fit: contain;
 }
@@ -546,18 +546,18 @@ onUnmounted(() => {
 /* 主内容区 - 使用固定宽度而不是fr单位 */
 .dashboard-content {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   flex: 1;
   overflow: hidden;
   min-height: 0;
-  padding: 12px 16px;
+  padding: 16px 20px;
 }
 
 .section-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   color: #000000;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   padding-bottom: 0;
   border-bottom: none;
   flex-shrink: 0;
@@ -566,10 +566,11 @@ onUnmounted(() => {
 /* 统计区域 - 固定宽度64% */
 .stats-section {
   background: transparent;
-  padding: 12px 0;
+  padding: 0;
   border-radius: 0;
   box-shadow: none;
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -580,22 +581,22 @@ onUnmounted(() => {
 .stats-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
   justify-content: space-between;
   align-content: flex-start;
 }
 
 .stats-grid > .stat-card {
-  width: calc(50% - 6px);
+  width: calc(50% - 8px);
   flex-shrink: 0;
 }
 
 .stat-card {
-  height: 120px;
+  height: 130px;
   position: relative;
   background: url('./assets/images/card-bg.png') no-repeat center;
   background-size: cover;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
   overflow: hidden;
   box-shadow: 
@@ -644,7 +645,7 @@ onUnmounted(() => {
 /* 特殊卡片：今日域内人员（居中布局，保留图标） */
 .stat-card.card-inside .stat-label {
   left: 50%;
-  top: 12px;
+  top: 14px;
   transform: translateX(-50%);
 }
 
@@ -657,7 +658,7 @@ onUnmounted(() => {
 .stat-card.card-inside .stat-note {
   left: 50%;
   top: auto;
-  bottom: 8px;
+  bottom: 10px;
   transform: translateX(-50%);
   text-align: center;
   max-width: 90%;
@@ -666,8 +667,8 @@ onUnmounted(() => {
 .stat-label {
   position: absolute;
   left: 40.9%;
-  top: 12px;
-  font-size: 12px;
+  top: 14px;
+  font-size: 13px;
   color: #000000;
   font-weight: 500;
   white-space: nowrap;
@@ -676,8 +677,8 @@ onUnmounted(() => {
 .stat-value-large {
   position: absolute;
   left: 40.9%;
-  top: 38px;
-  font-size: 28px;
+  top: 42px;
+  font-size: 30px;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -689,7 +690,7 @@ onUnmounted(() => {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 36px;
+  font-size: 38px;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -699,8 +700,8 @@ onUnmounted(() => {
 .stat-meta {
   position: absolute;
   left: 40.9%;
-  top: 84px;
-  font-size: 10px;
+  top: 90px;
+  font-size: 11px;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -708,8 +709,8 @@ onUnmounted(() => {
 .stat-note {
   position: absolute;
   left: 40.9%;
-  bottom: 8px;
-  font-size: 9px;
+  bottom: 10px;
+  font-size: 10px;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -732,7 +733,7 @@ onUnmounted(() => {
 /* 异常记录 - 固定宽度36% */
 .alert-section {
   background: transparent;
-  padding: 12px 0;
+  padding: 0;
   border-radius: 0;
   box-shadow: none;
   overflow: hidden;
@@ -747,7 +748,7 @@ onUnmounted(() => {
 .alert-table {
   flex: 1;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -755,16 +756,25 @@ onUnmounted(() => {
   box-shadow: 
     0 3px 6px rgba(0, 0, 0, 0.1),
     0 1px 3px rgba(0, 0, 0, 0.06);
+  min-height: 0;
 }
 
 .alert-table-header {
   display: flex;
   background: #ffffff;
-  padding: 8px 0;
-  font-size: 11px;
+  padding: 10px 0;
+  font-size: 12px;
   font-weight: 400;
   color: #8794A5;
   border-bottom: 2px solid rgba(166, 207, 255, 1);
+  flex-shrink: 0;
+}
+
+.alert-table-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
 }
 
 .alert-table-body {
@@ -775,11 +785,12 @@ onUnmounted(() => {
 
 .alert-table-row {
   display: flex;
-  padding: 7px 0;
-  font-size: 12px;
+  padding: 8px 0;
+  font-size: 13px;
   color: #333;
   border-bottom: 1px solid rgba(166, 207, 255, 0.3);
   transition: background 0.2s;
+  flex-shrink: 0;
 }
 
 .alert-table-row:hover {
@@ -824,9 +835,9 @@ onUnmounted(() => {
 }
 
 .level-badge {
-  padding: 3px 10px;
-  border-radius: 3px;
-  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -851,24 +862,24 @@ onUnmounted(() => {
 /* 图表区域 - 固定高度 */
 .chart-section {
   background: rgba(255, 255, 255, 0.9);
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 14px 18px;
+  border-radius: 10px;
   box-shadow: 
     0 3px 6px rgba(0, 0, 0, 0.1),
     0 1px 3px rgba(0, 0, 0, 0.06);
-  height: 170px;
+  height: 180px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin: 0 16px 12px 16px;
+  margin: 0 20px 16px 20px;
 }
 
 .chart-legend {
   display: flex;
-  gap: 20px;
-  margin-bottom: 8px;
-  font-size: 10px;
+  gap: 22px;
+  margin-bottom: 10px;
+  font-size: 11px;
   flex-shrink: 0;
   color: #8794A5;
 }
@@ -880,8 +891,8 @@ onUnmounted(() => {
 }
 
 .legend-dot {
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -1026,22 +1037,22 @@ onUnmounted(() => {
 
 /* 滚动条样式 */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(102, 126, 234, 0.5);
-  border-radius: 4px;
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(102, 126, 234, 0.8);
+  background: rgba(102, 126, 234, 0.5);
 }
 
 /* 响应式布局 - 平板和小屏幕 */
