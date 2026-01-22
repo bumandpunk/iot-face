@@ -436,12 +436,12 @@ onUnmounted(() => {
   font-size: 1vw;
 }
 
-/* 头部 - 使用vh */
+/* 头部 - 使用vh，增加高度 */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 2vw;
+  padding: 0 3vw;
   background-image: url('./assets/images/header-banner.png');
   background-size: cover;
   background-position: center;
@@ -449,7 +449,7 @@ onUnmounted(() => {
   border-radius: 0;
   box-shadow: none;
   flex-shrink: 0;
-  height: 10vh;
+  height: 12vh;
   position: relative;
 }
 
@@ -461,21 +461,21 @@ onUnmounted(() => {
 .network-status {
   display: flex;
   align-items: center;
-  gap: 0.5vw;
-  font-size: 0.9vw;
+  gap: 0.6vw;
+  font-size: 1vw;
   color: #000000;
   font-weight: 500;
 }
 
 .network-logo {
-  width: 1.5vw;
-  height: 1.5vw;
+  width: 2vw;
+  height: 2vw;
   object-fit: contain;
 }
 
 .status-dot {
-  width: 0.6vw;
-  height: 0.6vw;
+  width: 0.7vw;
+  height: 0.7vw;
   border-radius: 50%;
   background: #ccc;
   position: relative;
@@ -513,57 +513,57 @@ onUnmounted(() => {
 .title-wrapper {
   display: flex;
   align-items: center;
-  gap: 1vw;
+  gap: 1.2vw;
   flex: 1;
   justify-content: center;
-  margin-top: -0.5vh;
+  margin-top: 0;
 }
 
 .title-image {
-  height: 4vh;
+  height: 6vh;
   width: auto;
   object-fit: contain;
 }
 
 .title {
-  font-size: 1.8vw;
+  font-size: 2vw;
   font-weight: 500;
   color: #000000;
-  letter-spacing: 0.3vw;
+  letter-spacing: 0.4vw;
   white-space: nowrap;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .datetime {
-  font-size: 0.9vw;
+  font-size: 1vw;
   color: #000000;
   font-weight: 500;
-  padding: 0.5vh 1vw;
+  padding: 0.6vh 1.2vw;
   background: transparent;
   border-radius: 0.5vh;
 }
 
-/* 主内容区 - 真正的响应式布局 */
+/* 主内容区 - 增加左右边距 */
 .dashboard-content {
   display: flex;
-  gap: 1.5vw;
+  gap: 2vw;
   flex: 1;
   overflow: hidden;
   min-height: 0;
-  padding: 1.5vh 1.5vw;
+  padding: 2vh 3vw;
 }
 
 .section-title {
-  font-size: 1.1vw;
+  font-size: 1.2vw;
   font-weight: 500;
   color: #000000;
-  margin-bottom: 1.2vh;
+  margin-bottom: 1.5vh;
   padding-bottom: 0;
   border-bottom: none;
   flex-shrink: 0;
 }
 
-/* 统计区域 - 64% 宽度 */
+/* 统计区域 - 调整为65% */
 .stats-section {
   background: transparent;
   padding: 0;
@@ -574,34 +574,34 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  width: 64%;
+  width: 65%;
   flex-shrink: 0;
 }
 
 .stats-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.2vh 1vw;
+  gap: 1.8vh 1.5vw;
   justify-content: space-between;
   align-content: flex-start;
 }
 
 .stats-grid > .stat-card {
-  width: calc(50% - 0.5vw);
+  width: calc(50% - 0.75vw);
   flex-shrink: 0;
 }
 
 .stat-card {
-  height: 16vh;
+  height: 17vh;
   position: relative;
   background: url('./assets/images/card-bg.png') no-repeat center;
   background-size: cover;
-  border-radius: 0.8vh;
+  border-radius: 1vh;
   border: none;
   overflow: hidden;
   box-shadow: 
-    0 0.3vh 0.6vh rgba(0, 0, 0, 0.1),
-    0 0.1vh 0.3vh rgba(0, 0, 0, 0.06),
+    0 0.4vh 0.8vh rgba(0, 0, 0, 0.1),
+    0 0.2vh 0.4vh rgba(0, 0, 0, 0.06),
     inset 0 0.1vh 0 rgba(255, 255, 255, 0.5);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -668,7 +668,7 @@ onUnmounted(() => {
   position: absolute;
   left: 40.9%;
   top: 12%;
-  font-size: 0.9vw;
+  font-size: 1vw;
   color: #000000;
   font-weight: 500;
   white-space: nowrap;
@@ -678,7 +678,7 @@ onUnmounted(() => {
   position: absolute;
   left: 40.9%;
   top: 32%;
-  font-size: 2.2vw;
+  font-size: 2.4vw;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -690,7 +690,7 @@ onUnmounted(() => {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 3vw;
+  font-size: 3.2vw;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -701,7 +701,7 @@ onUnmounted(() => {
   position: absolute;
   left: 40.9%;
   top: 68%;
-  font-size: 0.75vw;
+  font-size: 0.8vw;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -710,7 +710,7 @@ onUnmounted(() => {
   position: absolute;
   left: 40.9%;
   bottom: 8%;
-  font-size: 0.7vw;
+  font-size: 0.75vw;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -730,7 +730,7 @@ onUnmounted(() => {
   font-weight: 600;
 }
 
-/* 异常记录 - 36% 宽度 */
+/* 异常记录 - 调整为35% */
 .alert-section {
   background: transparent;
   padding: 0;
@@ -740,7 +740,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  width: 36%;
+  width: 35%;
   flex-shrink: 0;
 }
 
@@ -748,22 +748,22 @@ onUnmounted(() => {
 .alert-table {
   flex: 1;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 0.8vh;
+  border-radius: 1vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   border: 0.1vh solid rgba(166, 207, 255, 0.5);
   box-shadow: 
-    0 0.3vh 0.6vh rgba(0, 0, 0, 0.1),
-    0 0.1vh 0.3vh rgba(0, 0, 0, 0.06);
+    0 0.4vh 0.8vh rgba(0, 0, 0, 0.1),
+    0 0.2vh 0.4vh rgba(0, 0, 0, 0.06);
   min-height: 0;
 }
 
 .alert-table-header {
   display: flex;
   background: #ffffff;
-  padding: 1vh 0;
-  font-size: 0.85vw;
+  padding: 1.2vh 0;
+  font-size: 0.9vw;
   font-weight: 400;
   color: #8794A5;
   border-bottom: 0.2vh solid rgba(166, 207, 255, 1);
@@ -785,8 +785,8 @@ onUnmounted(() => {
 
 .alert-table-row {
   display: flex;
-  padding: 0.8vh 0;
-  font-size: 0.9vw;
+  padding: 1vh 0;
+  font-size: 0.95vw;
   color: #333;
   border-bottom: 0.1vh solid rgba(166, 207, 255, 0.3);
   transition: background 0.2s;
@@ -802,7 +802,7 @@ onUnmounted(() => {
 }
 
 .alert-col {
-  padding: 0 0.8vw;
+  padding: 0 1vw;
   display: flex;
   align-items: center;
 }
@@ -835,9 +835,9 @@ onUnmounted(() => {
 }
 
 .level-badge {
-  padding: 0.4vh 0.8vw;
-  border-radius: 0.4vh;
-  font-size: 0.85vw;
+  padding: 0.5vh 1vw;
+  border-radius: 0.5vh;
+  font-size: 0.9vw;
   font-weight: 500;
 }
 
@@ -859,27 +859,27 @@ onUnmounted(() => {
   border: none;
 }
 
-/* 图表区域 - 使用vh */
+/* 图表区域 - 增加高度和边距 */
 .chart-section {
   background: rgba(255, 255, 255, 0.9);
-  padding: 1.2vh 1.5vw;
-  border-radius: 0.8vh;
+  padding: 1.5vh 2vw;
+  border-radius: 1vh;
   box-shadow: 
-    0 0.3vh 0.6vh rgba(0, 0, 0, 0.1),
-    0 0.1vh 0.3vh rgba(0, 0, 0, 0.06);
-  height: 22vh;
+    0 0.4vh 0.8vh rgba(0, 0, 0, 0.1),
+    0 0.2vh 0.4vh rgba(0, 0, 0, 0.06);
+  height: 24vh;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin: 0 1.5vw 1.5vh 1.5vw;
+  margin: 0 3vw 2vh 3vw;
 }
 
 .chart-legend {
   display: flex;
-  gap: 1.5vw;
-  margin-bottom: 1vh;
-  font-size: 0.8vw;
+  gap: 2vw;
+  margin-bottom: 1.2vh;
+  font-size: 0.9vw;
   flex-shrink: 0;
   color: #8794A5;
 }
@@ -887,12 +887,12 @@ onUnmounted(() => {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 0.5vw;
+  gap: 0.6vw;
 }
 
 .legend-dot {
-  width: 0.8vw;
-  height: 0.8vw;
+  width: 0.9vw;
+  height: 0.9vw;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -1035,24 +1035,24 @@ onUnmounted(() => {
   transform: scale(0.8);
 }
 
-/* 滚动条样式 */
+/* 滚动条样式 - 稍微大一点 */
 ::-webkit-scrollbar {
-  width: 0.4vw;
-  height: 0.4vh;
+  width: 0.5vw;
+  height: 0.5vh;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 0.2vw;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 0.25vw;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(102, 126, 234, 0.25);
-  border-radius: 0.2vw;
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 0.25vw;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(102, 126, 234, 0.4);
+  background: rgba(102, 126, 234, 0.5);
 }
 
 /* 响应式布局 - 平板和小屏幕 */
