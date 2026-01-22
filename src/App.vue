@@ -63,16 +63,14 @@
           <div class="alert-table-header">
             <div class="alert-col col-index">排序</div>
             <div class="alert-col col-time">告警时间</div>
-            <div class="alert-col col-level">信息等级</div>
+            <!-- <div class="alert-col col-level">信息等级</div> -->
             <div class="alert-col col-detail">信息详情</div>
           </div>
           <div class="alert-table-body">
             <div class="alert-table-row" v-for="(alert, index) in alerts" :key="alert.id">
               <div class="alert-col col-index">{{ index + 1 }}</div>
               <div class="alert-col col-time">{{ alert.time }}</div>
-              <div class="alert-col col-level">
-                <span class="level-badge" :class="alert.type">{{ alert.level }}</span>
-              </div>
+              
               <div class="alert-col col-detail">{{ alert.message }}</div>
             </div>
           </div>
@@ -167,11 +165,11 @@ const stats = ref({
 
 // 异常记录
 const alerts = ref([
-  { id: 1, time: '2026-01-21 14:02:43', level: '1/2/3', message: '门口监控1', type: 'warning' },
-  { id: 2, time: '2026-01-21 14:02:43', level: '1/2/3', message: '门口监控1', type: 'warning' },
-  { id: 3, time: '2026-01-21 14:02:43', level: '1/2/3', message: '门口监控1', type: 'warning' },
-  { id: 4, time: '2026-01-21 14:02:43', level: '1/2/3', message: '门口监控1', type: 'warning' },
-  { id: 5, time: '2026-01-21 14:02:43', level: '1/2/3', message: '门口监控1', type: 'warning' }
+  { id: 1, time: '2026-01-21 14:02:43',  message: '门口监控1', type: 'warning' },
+  { id: 2, time: '2026-01-21 14:02:43',  message: '门口监控1', type: 'warning' },
+  { id: 3, time: '2026-01-21 14:02:43',  message: '门口监控1', type: 'warning' },
+  { id: 4, time: '2026-01-21 14:02:43',  message: '门口监控1', type: 'warning' },
+  { id: 5, time: '2026-01-21 14:02:43',  message: '门口监控1', type: 'warning' }
 ])
 
 // 流量数据
@@ -287,7 +285,7 @@ const handleDashboardData = (dashboard) => {
         second: '2-digit',
         hour12: false 
       }).replace(/\//g, '-'),
-      level: alert.level || '1/2/3',
+   
       message: alert.message || alert.detail || '',
       type: alert.type || 'warning'
     }))
@@ -434,7 +432,7 @@ onUnmounted(() => {
   box-sizing: border-box;
   background: linear-gradient(180deg, #E6F1FF 0%, #F5FBFF 99.65%);
   /* 使用固定像素而不是vw */
-  font-size: 19.2px;
+  font-size: 1vw;
 }
 
 /* 头部 - 使用vh，增加高度 */
@@ -442,7 +440,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 57.6px;
+  padding: 0 3vw;
   background-image: url('./assets/images/header-banner.png');
   background-size: cover;
   background-position: center;
@@ -462,21 +460,21 @@ onUnmounted(() => {
 .network-status {
   display: flex;
   align-items: center;
-  gap: 19.2px;
-  font-size: 21.1px;
+  gap: 1vw;
+  font-size: 1.1vw;
   color: #000000;
   font-weight: 500;
 }
 
 .network-logo {
-  width: 42.2px;
-  height: 42.2px;
+  width: 2.2vw;
+  height: 2.2vw;
   object-fit: contain;
 }
 
 .status-dot {
-  width: 15.4px;
-  height: 15.4px;
+  width: 0.8vw;
+  height: 0.8vw;
   border-radius: 50%;
   background: #ccc;
   position: relative;
@@ -514,7 +512,7 @@ onUnmounted(() => {
 .title-wrapper {
   display: flex;
   align-items: center;
-  gap: 23px;
+  gap: 1.2vw;
   flex: 1;
   justify-content: center;
   margin-top: 0;
@@ -527,19 +525,19 @@ onUnmounted(() => {
 }
 
 .title {
-  font-size: 38.4px;
+  font-size: 2vw;
   font-weight: 500;
   color: #000000;
-  letter-spacing: 7.7px;
+  letter-spacing: 0.4vw;
   white-space: nowrap;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .datetime {
-  font-size: 19.2px;
+  font-size: 1vw;
   color: #000000;
   font-weight: 500;
-  padding: 0.6vh 23px;
+  padding: 0.6vh 1.2vw;
   background: transparent;
   border-radius: 0.5vh;
 }
@@ -547,15 +545,16 @@ onUnmounted(() => {
 /* 主内容区 - 增加gap，让卡片和表格有间距 */
 .dashboard-content {
   display: flex;
-  gap: 38.4px;
-  flex: 1;
+  gap: 2vw;
+  flex: 0 1 auto;
   overflow: hidden;
   min-height: 0;
-  padding: 2vh 57.6px;
+  padding: 1.5vh 3vw 1vh 3vw;
+  max-height: 60vh;
 }
 
 .section-title {
-  font-size: 23px;
+  font-size: 1.2vw;
   font-weight: 500;
   color: #000000;
   margin-bottom: 1.5vh;
@@ -570,8 +569,7 @@ onUnmounted(() => {
   padding: 0;
   border-radius: 0;
   box-shadow: none;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -582,24 +580,26 @@ onUnmounted(() => {
 .stats-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 2.2vh 28.8px;
+  gap: 1.8vh 1.5vw;
   justify-content: space-between;
   align-content: flex-start;
 }
 
 .stats-grid > .stat-card {
-  width: calc(50% - 14.4px);
+  width: calc(50% - 0.75vw);
   flex-shrink: 0;
 }
 
 .stat-card {
-  height: 17vh;
+  height: 15vh;
+  min-height: 130px;
   position: relative;
   background: url('./assets/images/card-bg.png') no-repeat center;
   background-size: cover;
   border-radius: 1vh;
   border: none;
   overflow: hidden;
+  margin-bottom:30px;
   box-shadow: 
     0 0.4vh 0.8vh rgba(0, 0, 0, 0.1),
     0 0.2vh 0.4vh rgba(0, 0, 0, 0.06),
@@ -607,13 +607,7 @@ onUnmounted(() => {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 16px rgba(0, 0, 0, 0.15),
-    0 4px 8px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
+
 
 .stat-card::before {
   content: '';
@@ -669,7 +663,7 @@ onUnmounted(() => {
   position: absolute;
   left: 40.9%;
   top: 12%;
-  font-size: 19.2px;
+  font-size: 1vw;
   color: #000000;
   font-weight: 500;
   white-space: nowrap;
@@ -679,7 +673,7 @@ onUnmounted(() => {
   position: absolute;
   left: 40.9%;
   top: 32%;
-  font-size: 46.1px;
+  font-size: 2.4vw;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -691,7 +685,7 @@ onUnmounted(() => {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 61.4px;
+  font-size: 3.2vw;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -702,7 +696,7 @@ onUnmounted(() => {
   position: absolute;
   left: 40.9%;
   top: 68%;
-  font-size: 15.4px;
+  font-size: 0.8vw;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -711,7 +705,7 @@ onUnmounted(() => {
   position: absolute;
   left: 40.9%;
   bottom: 8%;
-  font-size: 14.4px;
+  font-size: 0.75vw;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -731,7 +725,7 @@ onUnmounted(() => {
   font-weight: 600;
 }
 
-/* 异常记录 - 调整为35% */
+/* 异常记录 - 调整为35%，固定高度不撑开 */
 .alert-section {
   background: transparent;
   padding: 0;
@@ -741,13 +735,14 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  width: 35%;
+  max-height: 100%;
+  width: 33%;
   flex-shrink: 0;
 }
 
-/* 异常告警表格 */
+/* 异常告警表格 - 控制高度，只显示5条数据 */
 .alert-table {
-  flex: 1;
+  flex: 0 1 auto;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 1vh;
   overflow: hidden;
@@ -758,13 +753,14 @@ onUnmounted(() => {
     0 0.4vh 0.8vh rgba(0, 0, 0, 0.1),
     0 0.2vh 0.4vh rgba(0, 0, 0, 0.06);
   min-height: 0;
+  max-height: fit-content;
 }
 
 .alert-table-header {
   display: flex;
   background: #ffffff;
   padding: 1.2vh 0;
-  font-size: 17.3px;
+  font-size: 0.9vw;
   font-weight: 400;
   color: #8794A5;
   border-bottom: 0.2vh solid rgba(166, 207, 255, 1);
@@ -772,10 +768,10 @@ onUnmounted(() => {
 }
 
 .alert-table-body {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  flex: 0 1 auto;
+  overflow: visible;
   min-height: 0;
+  max-height: fit-content;
 }
 
 .alert-table-body {
@@ -787,7 +783,7 @@ onUnmounted(() => {
 .alert-table-row {
   display: flex;
   padding: 1vh 0;
-  font-size: 18.2px;
+  font-size: 0.95vw;
   color: #333;
   border-bottom: 0.1vh solid rgba(166, 207, 255, 0.3);
   transition: background 0.2s;
@@ -803,7 +799,7 @@ onUnmounted(() => {
 }
 
 .alert-col {
-  padding: 0 19.2px;
+  padding: 0.5vw 1vw;
   display: flex;
   align-items: center;
 }
@@ -817,7 +813,7 @@ onUnmounted(() => {
 }
 
 .col-time {
-  width: 30%;
+  width: 45%;
   color: #000000;
   font-weight: 400;
 }
@@ -836,9 +832,9 @@ onUnmounted(() => {
 }
 
 .level-badge {
-  padding: 0.5vh 19.2px;
+  padding: 0.5vh 1vw;
   border-radius: 0.5vh;
-  font-size: 17.3px;
+  font-size: 0.9vw;
   font-weight: 500;
 }
 
@@ -860,27 +856,29 @@ onUnmounted(() => {
   border: none;
 }
 
-/* 图表区域 - 调整图例间距和字体 */
+/* 图表区域 - 扩大高度，占据更多空间 */
 .chart-section {
   background: rgba(255, 255, 255, 0.9);
-  padding: 1.5vh 38.4px;
+  padding: 1.5vh 2vw;
   border-radius: 1vh;
   box-shadow: 
     0 0.4vh 0.8vh rgba(0, 0, 0, 0.1),
     0 0.2vh 0.4vh rgba(0, 0, 0, 0.06);
-  height: 18vh;
+  flex: 1;
+  min-height: 20vh;
+  max-height: 35vh;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin: 0 57.6px 2vh 57.6px;
+  margin: 0 3vw 2vh 3vw;
 }
 
 .chart-legend {
   display: flex;
-  gap: 57.6px;
+  gap: 3vw;
   margin-bottom: 1vh;
-  font-size: 17.3px;
+  font-size: 0.9vw;
   flex-shrink: 0;
   color: #8794A5;
 }
@@ -888,12 +886,12 @@ onUnmounted(() => {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 15.4px;
+  gap: 0.8vw;
 }
 
 .legend-dot {
-  width: 17.3px;
-  height: 17.3px;
+  width: 0.9vw;
+  height: 0.9vw;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -1038,18 +1036,18 @@ onUnmounted(() => {
 
 /* 滚动条样式 - 稍微大一点 */
 ::-webkit-scrollbar {
-  width: 9.6px;
+  width: 0.5vw;
   height: 0.5vh;
 }
 
 ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.04);
-  border-radius: 4.8px;
+  border-radius: 0.25vw;
 }
 
 ::-webkit-scrollbar-thumb {
   background: rgba(102, 126, 234, 0.3);
-  border-radius: 4.8px;
+  border-radius: 0.25vw;
 }
 
 ::-webkit-scrollbar-thumb:hover {
