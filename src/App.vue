@@ -417,9 +417,9 @@ onUnmounted(() => {
 <style scoped>
 /* 基础重置 - 强制禁止电视端字体缩放 */
 * {
-  -webkit-text-size-adjust: none !important;
-  -ms-text-size-adjust: none !important;
-  text-size-adjust: none !important;
+  -webkit-text-size-adjust: 100% !important;
+  -ms-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
   box-sizing: border-box;
 }
 
@@ -433,7 +433,7 @@ onUnmounted(() => {
   overflow: hidden;
   box-sizing: border-box;
   background: linear-gradient(180deg, #E6F1FF 0%, #F5FBFF 99.65%);
-  font-size: 1vw;
+  font-size: 16px;
 }
 
 /* 头部 - 使用vh，增加高度 */

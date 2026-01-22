@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 强制禁用系统字体缩放影响 -->
+    <bool name="config_allowScalingFonts">false</bool>
+</resources>
