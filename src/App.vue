@@ -415,9 +415,16 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 基础重置 - 防止电视端字体缩放 */
+* {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 .dashboard-container {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -432,7 +439,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 2vw;
+  padding: 0 30px;
   background-image: url('./assets/images/header-banner.png');
   background-size: cover;
   background-position: center;
@@ -440,7 +447,7 @@ onUnmounted(() => {
   border-radius: 0;
   box-shadow: none;
   flex-shrink: 0;
-  height: clamp(80px, 11vh, 120px);
+  height: 100px;
   position: relative;
 }
 
@@ -452,21 +459,21 @@ onUnmounted(() => {
 .network-status {
   display: flex;
   align-items: center;
-  gap: 0.8vw;
-  font-size: clamp(16px, 1.8vh, 18px);
+  gap: 12px;
+  font-size: 18px;
   color: #000000;
   font-weight: 500;
 }
 
 .network-logo {
-  width: clamp(24px, 3vh, 32px);
-  height: clamp(24px, 3vh, 32px);
+  width: 28px;
+  height: 28px;
   object-fit: contain;
 }
 
 .status-dot {
-  width: 1.2vh;
-  height: 1.2vh;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: #ccc;
   position: relative;
@@ -504,54 +511,54 @@ onUnmounted(() => {
 .title-wrapper {
   display: flex;
   align-items: center;
-  gap: 2vw;
+  gap: 30px;
   flex: 1;
   justify-content: center;
-  margin-top: -1vh;
+  margin-top: -8px;
 }
 
 .title-image {
-  height: clamp(40px, 5.5vh, 60px);
+  height: 56px;
   width: auto;
   object-fit: contain;
 }
 
 .title {
-  font-size: clamp(20px, 2.8vh, 30px);
+  font-size: 28px;
   font-weight: 500;
   color: #000000;
-  letter-spacing: 0.3vw;
+  letter-spacing: 6px;
   white-space: nowrap;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .datetime {
-  font-size: clamp(16px, 1.6vh, 16px);
+  font-size: 16px;
   color: #000000;
   font-weight: 500;
-  padding: 0.8vh 1.2vw;
+  padding: 8px 18px;
   background: transparent;
-  border-radius: 0.6vh;
+  border-radius: 6px;
 }
 
 /* 主内容区 - 占据剩余空间 */
 .dashboard-content {
   display: grid;
   grid-template-columns: 1.8fr 1fr;
-  gap: 2vw;
+  gap: 30px;
   flex: 1;
   overflow: hidden;
   min-height: 0;
-  padding: 1.5vh 1.5vw;
-  padding-left: 1.5vw;
-  padding-right: 1.5vw;
+  padding: 20px 30px;
+  padding-left: 30px;
+  padding-right: 30px;
 }
 
 .section-title {
-  font-size: clamp(16px, 2vh, 20px);
+  font-size: 20px;
   font-weight: 500;
   color: #000000;
-  margin-bottom: 1.5vh;
+  margin-bottom: 18px;
   padding-bottom: 0;
   border-bottom: none;
   flex-shrink: 0;
@@ -560,7 +567,7 @@ onUnmounted(() => {
 /* 统计区域 */
 .stats-section {
   background: transparent;
-  padding: 2vh 0;
+  padding: 20px 0;
   border-radius: 0;
   box-shadow: none;
   overflow-y: auto;
@@ -572,19 +579,18 @@ onUnmounted(() => {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 2vh 1.5vw;
+  gap: 20px 24px;
   justify-content: start;
   align-content: start;
 }
 
 .stat-card {
   width: 100%;
-  height: 0;
-  padding-bottom: 42.67%; /* 192/450 = 42.67% 保持宽高比 */
+  height: 180px; /* 固定高度，适配电视 */
   position: relative;
   background: url('./assets/images/card-bg.png') no-repeat center;
   background-size: cover;
-  border-radius: 1.2vh;
+  border-radius: 12px;
   border: none;
   overflow: hidden;
   box-shadow: 
@@ -633,7 +639,7 @@ onUnmounted(() => {
 /* 特殊卡片：今日域内人员（居中布局，保留图标） */
 .stat-card.card-inside .stat-label {
   left: 50%;
-  top: 12.5%;
+  top: 22px;
   transform: translateX(-50%);
 }
 
@@ -646,7 +652,7 @@ onUnmounted(() => {
 .stat-card.card-inside .stat-note {
   left: 50%;
   top: auto;
-  bottom: 7.3%;
+  bottom: 14px;
   transform: translateX(-50%);
   text-align: center;
   max-width: 90%;
@@ -655,8 +661,8 @@ onUnmounted(() => {
 .stat-label {
   position: absolute;
   left: 40.9%;  /* 184/450 ≈ 40.9% */
-  top: 12.5%;   /* 24/192 ≈ 12.5% */
-  font-size: clamp(14px, 1.8vh, 20px);
+  top: 22px;
+  font-size: 18px;
   color: #000000;
   font-weight: 500;
   white-space: nowrap;
@@ -665,8 +671,8 @@ onUnmounted(() => {
 .stat-value-large {
   position: absolute;
   left: 40.9%;   /* 184/450 */
-  top: 33.9%;    /* 65/192 */
-  font-size: clamp(28px, 4.5vh, 50px);
+  top: 60px;
+  font-size: 42px;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -678,7 +684,7 @@ onUnmounted(() => {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: clamp(35px, 6vh, 65px);
+  font-size: 52px;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -688,8 +694,8 @@ onUnmounted(() => {
 .stat-meta {
   position: absolute;
   left: 40.9%;   /* 184/450 */
-  top: 71.9%;    /* 138/192 */
-  font-size: clamp(12px, 1.4vh, 14px);
+  top: 130px;
+  font-size: 14px;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -697,8 +703,8 @@ onUnmounted(() => {
 .stat-note {
   position: absolute;
   left: 40.9%;   /* 184/450 */
-  bottom: 7.3%;  /* 14/192 */
-  font-size: clamp(11px, 1.3vh, 14px);
+  bottom: 14px;
+  font-size: 13px;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -721,7 +727,7 @@ onUnmounted(() => {
 /* 异常记录 */
 .alert-section {
   background: transparent;
-  padding: 2vh 0;
+  padding: 20px 0;
   border-radius: 0;
   box-shadow: none;
   overflow: hidden;
@@ -734,11 +740,11 @@ onUnmounted(() => {
 .alert-table {
   flex: 1;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 1vh;
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  border: 0.1vh solid rgba(166, 207, 255, 0.5);
+  border: 1px solid rgba(166, 207, 255, 0.5);
   box-shadow: 
     0 4px 8px rgba(0, 0, 0, 0.1),
     0 2px 4px rgba(0, 0, 0, 0.06);
@@ -747,11 +753,11 @@ onUnmounted(() => {
 .alert-table-header {
   display: flex;
   background: #ffffff;
-  padding: 1.2vh 0;
-  font-size: clamp(12px, 1.6vh, 16px);
+  padding: 14px 0;
+  font-size: 16px;
   font-weight: 400;
   color: #8794A5;
-  border-bottom: 0.15vh solid rgba(166, 207, 255, 1);
+  border-bottom: 2px solid rgba(166, 207, 255, 1);
 }
 
 .alert-table-body {
@@ -762,10 +768,10 @@ onUnmounted(() => {
 
 .alert-table-row {
   display: flex;
-  padding: 1vh 0;
-  font-size: clamp(14px, 1.8vh, 20px);
+  padding: 12px 0;
+  font-size: 18px;
   color: #333;
-  border-bottom: 0.1vh solid rgba(166, 207, 255, 0.3);
+  border-bottom: 1px solid rgba(166, 207, 255, 0.3);
   transition: background 0.2s;
 }
 
@@ -778,7 +784,7 @@ onUnmounted(() => {
 }
 
 .alert-col {
-  padding: 0 1vw;
+  padding: 0 15px;
   display: flex;
   align-items: center;
 }
@@ -811,9 +817,9 @@ onUnmounted(() => {
 }
 
 .level-badge {
-  padding: 0.4vh 1vw;
-  border-radius: 0.4vh;
-  font-size: clamp(12px, 1.5vh, 16px);
+  padding: 6px 15px;
+  border-radius: 5px;
+  font-size: 15px;
   font-weight: 500;
 }
 
@@ -838,24 +844,24 @@ onUnmounted(() => {
 /* 图表区域 - 固定高度 */
 .chart-section {
   background: rgba(255, 255, 255, 0.9);
-  padding: 2vh 1.5vw;
-  border-radius: 1.2vh;
+  padding: 20px 24px;
+  border-radius: 12px;
   box-shadow: 
     0 4px 8px rgba(0, 0, 0, 0.1),
     0 2px 4px rgba(0, 0, 0, 0.06);
-  height: 27vh;
+  height: 260px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin: 0 1.5vw 1.5vh 1.5vw;
+  margin: 0 30px 20px 30px;
 }
 
 .chart-legend {
   display: flex;
-  gap: 2vw;
-  margin-bottom: 1.2vh;
-  font-size: clamp(12px, 1.4vh, 14px);
+  gap: 30px;
+  margin-bottom: 14px;
+  font-size: 14px;
   flex-shrink: 0;
   color: #8794A5;
 }
@@ -863,12 +869,12 @@ onUnmounted(() => {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 0.8vw;
+  gap: 12px;
 }
 
 .legend-dot {
-  width: 1.4vh;
-  height: 1.4vh;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -901,32 +907,32 @@ onUnmounted(() => {
 
 .popup-content {
   background: #ffffff;
-  padding: 4vh 5vw 3vh;
-  border-radius: 1.2vh;
+  padding: 50px 80px 40px;
+  border-radius: 12px;
   text-align: center;
-  min-width: 40vw;
-  max-width: 45vw;
-  box-shadow: 0 0.5vh 2vh rgba(31, 127, 237, 0.2);
+  min-width: 600px;
+  max-width: 700px;
+  box-shadow: 0 8px 32px rgba(31, 127, 237, 0.2);
   position: relative;
-  border: 0.2vh solid rgba(166, 207, 255, 0.3);
+  border: 2px solid rgba(166, 207, 255, 0.3);
 }
 
 /* 头像区域 */
 .popup-avatar-wrapper {
   position: relative;
-  width: 20vh;
-  height: 20vh;
-  margin: 0 auto 2.5vh;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 28px;
 }
 
 .popup-avatar {
   width: 100%;
   height: 100%;
-  border: 0.4vh solid #1F7FED;
-  border-radius: 0.8vh;
+  border: 5px solid #1F7FED;
+  border-radius: 8px;
   overflow: hidden;
   background: #000;
-  box-shadow: 0 0.3vh 1vh rgba(31, 127, 237, 0.3);
+  box-shadow: 0 4px 12px rgba(31, 127, 237, 0.3);
 }
 
 .popup-avatar img {
@@ -937,10 +943,10 @@ onUnmounted(() => {
 
 /* 欢迎信息 */
 .popup-welcome {
-  font-size: 3.2vh;
+  font-size: 32px;
   font-weight: 500;
   color: #000000;
-  margin-bottom: 2.5vh;
+  margin-bottom: 28px;
   line-height: 1.5;
 }
 
@@ -962,23 +968,23 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding-top: 2vh;
-  gap: 3vw;
+  padding-top: 24px;
+  gap: 45px;
 }
 
 .popup-footer-item {
   display: flex;
   align-items: baseline;
-  gap: 0.5vw;
+  gap: 8px;
 }
 
 .popup-footer-label {
-  font-size: 1.6vh;
+  font-size: 16px;
   color: #8794A5;
 }
 
 .popup-footer-value {
-  font-size: 1.8vh;
+  font-size: 18px;
   font-weight: 600;
   color: #1F7FED;
 }
@@ -1013,18 +1019,18 @@ onUnmounted(() => {
 
 /* 滚动条样式 */
 ::-webkit-scrollbar {
-  width: 0.6vw;
-  height: 0.6vh;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.1);
-  border-radius: 0.3vw;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: rgba(102, 126, 234, 0.5);
-  border-radius: 0.3vw;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
