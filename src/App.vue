@@ -424,8 +424,8 @@ onUnmounted(() => {
 }
 
 .dashboard-container {
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -433,15 +433,15 @@ onUnmounted(() => {
   overflow: hidden;
   box-sizing: border-box;
   background: linear-gradient(180deg, #E6F1FF 0%, #F5FBFF 99.65%);
-  font-size: 12px;
+  font-size: 1vw;
 }
 
-/* 头部 - 固定高度 */
+/* 头部 - 使用vh */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 2vw;
   background-image: url('./assets/images/header-banner.png');
   background-size: cover;
   background-position: center;
@@ -449,7 +449,7 @@ onUnmounted(() => {
   border-radius: 0;
   box-shadow: none;
   flex-shrink: 0;
-  height: 75px;
+  height: 10vh;
   position: relative;
 }
 
@@ -461,21 +461,21 @@ onUnmounted(() => {
 .network-status {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: 0.5vw;
+  font-size: 0.9vw;
   color: #000000;
   font-weight: 500;
 }
 
 .network-logo {
-  width: 20px;
-  height: 20px;
+  width: 1.5vw;
+  height: 1.5vw;
   object-fit: contain;
 }
 
 .status-dot {
-  width: 8px;
-  height: 8px;
+  width: 0.6vw;
+  height: 0.6vw;
   border-radius: 50%;
   background: #ccc;
   position: relative;
@@ -513,57 +513,57 @@ onUnmounted(() => {
 .title-wrapper {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 1vw;
   flex: 1;
   justify-content: center;
-  margin-top: -4px;
+  margin-top: -0.5vh;
 }
 
 .title-image {
-  height: 40px;
+  height: 4vh;
   width: auto;
   object-fit: contain;
 }
 
 .title {
-  font-size: 18px;
+  font-size: 1.8vw;
   font-weight: 500;
   color: #000000;
-  letter-spacing: 3px;
+  letter-spacing: 0.3vw;
   white-space: nowrap;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .datetime {
-  font-size: 12px;
+  font-size: 0.9vw;
   color: #000000;
   font-weight: 500;
-  padding: 5px 12px;
+  padding: 0.5vh 1vw;
   background: transparent;
-  border-radius: 4px;
+  border-radius: 0.5vh;
 }
 
-/* 主内容区 - 使用固定宽度而不是fr单位 */
+/* 主内容区 - 真正的响应式布局 */
 .dashboard-content {
   display: flex;
-  gap: 20px;
+  gap: 1.5vw;
   flex: 1;
   overflow: hidden;
   min-height: 0;
-  padding: 16px 20px;
+  padding: 1.5vh 1.5vw;
 }
 
 .section-title {
-  font-size: 15px;
+  font-size: 1.1vw;
   font-weight: 500;
   color: #000000;
-  margin-bottom: 12px;
+  margin-bottom: 1.2vh;
   padding-bottom: 0;
   border-bottom: none;
   flex-shrink: 0;
 }
 
-/* 统计区域 - 固定宽度64% */
+/* 统计区域 - 64% 宽度 */
 .stats-section {
   background: transparent;
   padding: 0;
@@ -581,28 +581,28 @@ onUnmounted(() => {
 .stats-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 1.2vh 1vw;
   justify-content: space-between;
   align-content: flex-start;
 }
 
 .stats-grid > .stat-card {
-  width: calc(50% - 8px);
+  width: calc(50% - 0.5vw);
   flex-shrink: 0;
 }
 
 .stat-card {
-  height: 130px;
+  height: 16vh;
   position: relative;
   background: url('./assets/images/card-bg.png') no-repeat center;
   background-size: cover;
-  border-radius: 10px;
+  border-radius: 0.8vh;
   border: none;
   overflow: hidden;
   box-shadow: 
-    0 3px 6px rgba(0, 0, 0, 0.1),
-    0 1px 3px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    0 0.3vh 0.6vh rgba(0, 0, 0, 0.1),
+    0 0.1vh 0.3vh rgba(0, 0, 0, 0.06),
+    inset 0 0.1vh 0 rgba(255, 255, 255, 0.5);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -645,7 +645,7 @@ onUnmounted(() => {
 /* 特殊卡片：今日域内人员（居中布局，保留图标） */
 .stat-card.card-inside .stat-label {
   left: 50%;
-  top: 14px;
+  top: 12%;
   transform: translateX(-50%);
 }
 
@@ -658,7 +658,7 @@ onUnmounted(() => {
 .stat-card.card-inside .stat-note {
   left: 50%;
   top: auto;
-  bottom: 10px;
+  bottom: 8%;
   transform: translateX(-50%);
   text-align: center;
   max-width: 90%;
@@ -667,8 +667,8 @@ onUnmounted(() => {
 .stat-label {
   position: absolute;
   left: 40.9%;
-  top: 14px;
-  font-size: 13px;
+  top: 12%;
+  font-size: 0.9vw;
   color: #000000;
   font-weight: 500;
   white-space: nowrap;
@@ -677,8 +677,8 @@ onUnmounted(() => {
 .stat-value-large {
   position: absolute;
   left: 40.9%;
-  top: 42px;
-  font-size: 30px;
+  top: 32%;
+  font-size: 2.2vw;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -690,7 +690,7 @@ onUnmounted(() => {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 38px;
+  font-size: 3vw;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -700,8 +700,8 @@ onUnmounted(() => {
 .stat-meta {
   position: absolute;
   left: 40.9%;
-  top: 90px;
-  font-size: 11px;
+  top: 68%;
+  font-size: 0.75vw;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -709,8 +709,8 @@ onUnmounted(() => {
 .stat-note {
   position: absolute;
   left: 40.9%;
-  bottom: 10px;
-  font-size: 10px;
+  bottom: 8%;
+  font-size: 0.7vw;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -730,7 +730,7 @@ onUnmounted(() => {
   font-weight: 600;
 }
 
-/* 异常记录 - 固定宽度36% */
+/* 异常记录 - 36% 宽度 */
 .alert-section {
   background: transparent;
   padding: 0;
@@ -748,25 +748,25 @@ onUnmounted(() => {
 .alert-table {
   flex: 1;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 10px;
+  border-radius: 0.8vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(166, 207, 255, 0.5);
+  border: 0.1vh solid rgba(166, 207, 255, 0.5);
   box-shadow: 
-    0 3px 6px rgba(0, 0, 0, 0.1),
-    0 1px 3px rgba(0, 0, 0, 0.06);
+    0 0.3vh 0.6vh rgba(0, 0, 0, 0.1),
+    0 0.1vh 0.3vh rgba(0, 0, 0, 0.06);
   min-height: 0;
 }
 
 .alert-table-header {
   display: flex;
   background: #ffffff;
-  padding: 10px 0;
-  font-size: 12px;
+  padding: 1vh 0;
+  font-size: 0.85vw;
   font-weight: 400;
   color: #8794A5;
-  border-bottom: 2px solid rgba(166, 207, 255, 1);
+  border-bottom: 0.2vh solid rgba(166, 207, 255, 1);
   flex-shrink: 0;
 }
 
@@ -785,10 +785,10 @@ onUnmounted(() => {
 
 .alert-table-row {
   display: flex;
-  padding: 8px 0;
-  font-size: 13px;
+  padding: 0.8vh 0;
+  font-size: 0.9vw;
   color: #333;
-  border-bottom: 1px solid rgba(166, 207, 255, 0.3);
+  border-bottom: 0.1vh solid rgba(166, 207, 255, 0.3);
   transition: background 0.2s;
   flex-shrink: 0;
 }
@@ -802,7 +802,7 @@ onUnmounted(() => {
 }
 
 .alert-col {
-  padding: 0 10px;
+  padding: 0 0.8vw;
   display: flex;
   align-items: center;
 }
@@ -835,9 +835,9 @@ onUnmounted(() => {
 }
 
 .level-badge {
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 12px;
+  padding: 0.4vh 0.8vw;
+  border-radius: 0.4vh;
+  font-size: 0.85vw;
   font-weight: 500;
 }
 
@@ -859,27 +859,27 @@ onUnmounted(() => {
   border: none;
 }
 
-/* 图表区域 - 固定高度 */
+/* 图表区域 - 使用vh */
 .chart-section {
   background: rgba(255, 255, 255, 0.9);
-  padding: 14px 18px;
-  border-radius: 10px;
+  padding: 1.2vh 1.5vw;
+  border-radius: 0.8vh;
   box-shadow: 
-    0 3px 6px rgba(0, 0, 0, 0.1),
-    0 1px 3px rgba(0, 0, 0, 0.06);
-  height: 180px;
+    0 0.3vh 0.6vh rgba(0, 0, 0, 0.1),
+    0 0.1vh 0.3vh rgba(0, 0, 0, 0.06);
+  height: 22vh;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin: 0 20px 16px 20px;
+  margin: 0 1.5vw 1.5vh 1.5vw;
 }
 
 .chart-legend {
   display: flex;
-  gap: 22px;
-  margin-bottom: 10px;
-  font-size: 11px;
+  gap: 1.5vw;
+  margin-bottom: 1vh;
+  font-size: 0.8vw;
   flex-shrink: 0;
   color: #8794A5;
 }
@@ -887,12 +887,12 @@ onUnmounted(() => {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5vw;
 }
 
 .legend-dot {
-  width: 11px;
-  height: 11px;
+  width: 0.8vw;
+  height: 0.8vw;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -1037,22 +1037,22 @@ onUnmounted(() => {
 
 /* 滚动条样式 */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 0.4vw;
+  height: 0.4vh;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 0.2vw;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(102, 126, 234, 0.3);
-  border-radius: 3px;
+  background: rgba(102, 126, 234, 0.25);
+  border-radius: 0.2vw;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(102, 126, 234, 0.5);
+  background: rgba(102, 126, 234, 0.4);
 }
 
 /* 响应式布局 - 平板和小屏幕 */
