@@ -433,7 +433,7 @@ onUnmounted(() => {
   overflow: hidden;
   box-sizing: border-box;
   background: linear-gradient(180deg, #E6F1FF 0%, #F5FBFF 99.65%);
-  font-size: 14px;
+  font-size: 12px;
 }
 
 /* 头部 - 固定高度 */
@@ -441,7 +441,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 24px;
+  padding: 0 20px;
   background-image: url('./assets/images/header-banner.png');
   background-size: cover;
   background-position: center;
@@ -449,7 +449,7 @@ onUnmounted(() => {
   border-radius: 0;
   box-shadow: none;
   flex-shrink: 0;
-  height: 80px;
+  height: 70px;
   position: relative;
 }
 
@@ -461,21 +461,21 @@ onUnmounted(() => {
 .network-status {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
+  gap: 8px;
+  font-size: 12px;
   color: #000000;
   font-weight: 500;
 }
 
 .network-logo {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
 }
 
 .status-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #ccc;
   position: relative;
@@ -513,89 +513,94 @@ onUnmounted(() => {
 .title-wrapper {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   flex: 1;
   justify-content: center;
-  margin-top: -5px;
+  margin-top: -4px;
 }
 
 .title-image {
-  height: 45px;
+  height: 38px;
   width: auto;
   object-fit: contain;
 }
 
 .title {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 500;
   color: #000000;
-  letter-spacing: 4px;
+  letter-spacing: 3px;
   white-space: nowrap;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .datetime {
-  font-size: 14px;
+  font-size: 12px;
   color: #000000;
   font-weight: 500;
-  padding: 6px 14px;
+  padding: 5px 12px;
   background: transparent;
-  border-radius: 5px;
+  border-radius: 4px;
 }
 
-/* 主内容区 - 占据剩余空间 */
+/* 主内容区 - 使用固定宽度而不是fr单位 */
 .dashboard-content {
-  display: grid;
-  grid-template-columns: 1.8fr 1fr;
-  gap: 20px;
+  display: flex;
+  gap: 16px;
   flex: 1;
   overflow: hidden;
   min-height: 0;
-  padding: 15px 20px;
+  padding: 12px 16px;
 }
 
 .section-title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   color: #000000;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   padding-bottom: 0;
   border-bottom: none;
   flex-shrink: 0;
 }
 
-/* 统计区域 */
+/* 统计区域 - 固定宽度64% */
 .stats-section {
   background: transparent;
-  padding: 15px 0;
+  padding: 12px 0;
   border-radius: 0;
   box-shadow: none;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  width: 64%;
+  flex-shrink: 0;
 }
 
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px 18px;
-  justify-content: start;
-  align-content: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-content: flex-start;
+}
+
+.stats-grid > .stat-card {
+  width: calc(50% - 6px);
+  flex-shrink: 0;
 }
 
 .stat-card {
-  width: 100%;
-  height: 140px; /* 减小卡片高度 */
+  height: 120px;
   position: relative;
   background: url('./assets/images/card-bg.png') no-repeat center;
   background-size: cover;
-  border-radius: 10px;
+  border-radius: 8px;
   border: none;
   overflow: hidden;
   box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.1),
-    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 3px 6px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -639,7 +644,7 @@ onUnmounted(() => {
 /* 特殊卡片：今日域内人员（居中布局，保留图标） */
 .stat-card.card-inside .stat-label {
   left: 50%;
-  top: 16px;
+  top: 12px;
   transform: translateX(-50%);
 }
 
@@ -652,7 +657,7 @@ onUnmounted(() => {
 .stat-card.card-inside .stat-note {
   left: 50%;
   top: auto;
-  bottom: 10px;
+  bottom: 8px;
   transform: translateX(-50%);
   text-align: center;
   max-width: 90%;
@@ -661,8 +666,8 @@ onUnmounted(() => {
 .stat-label {
   position: absolute;
   left: 40.9%;
-  top: 16px;
-  font-size: 14px;
+  top: 12px;
+  font-size: 12px;
   color: #000000;
   font-weight: 500;
   white-space: nowrap;
@@ -671,8 +676,8 @@ onUnmounted(() => {
 .stat-value-large {
   position: absolute;
   left: 40.9%;
-  top: 46px;
-  font-size: 32px;
+  top: 38px;
+  font-size: 28px;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -684,7 +689,7 @@ onUnmounted(() => {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 40px;
+  font-size: 36px;
   font-weight: 400;
   color: #1F7FED;
   line-height: 1.2;
@@ -694,8 +699,8 @@ onUnmounted(() => {
 .stat-meta {
   position: absolute;
   left: 40.9%;
-  top: 100px;
-  font-size: 12px;
+  top: 84px;
+  font-size: 10px;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -703,8 +708,8 @@ onUnmounted(() => {
 .stat-note {
   position: absolute;
   left: 40.9%;
-  bottom: 10px;
-  font-size: 11px;
+  bottom: 8px;
+  font-size: 9px;
   color: #8794A5;
   white-space: nowrap;
 }
@@ -724,37 +729,39 @@ onUnmounted(() => {
   font-weight: 600;
 }
 
-/* 异常记录 */
+/* 异常记录 - 固定宽度36% */
 .alert-section {
   background: transparent;
-  padding: 15px 0;
+  padding: 12px 0;
   border-radius: 0;
   box-shadow: none;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  width: 36%;
+  flex-shrink: 0;
 }
 
 /* 异常告警表格 */
 .alert-table {
   flex: 1;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(166, 207, 255, 0.5);
   box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.1),
-    0 2px 4px rgba(0, 0, 0, 0.06);
+    0 3px 6px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .alert-table-header {
   display: flex;
   background: #ffffff;
-  padding: 10px 0;
-  font-size: 13px;
+  padding: 8px 0;
+  font-size: 11px;
   font-weight: 400;
   color: #8794A5;
   border-bottom: 2px solid rgba(166, 207, 255, 1);
@@ -768,8 +775,8 @@ onUnmounted(() => {
 
 .alert-table-row {
   display: flex;
-  padding: 9px 0;
-  font-size: 14px;
+  padding: 7px 0;
+  font-size: 12px;
   color: #333;
   border-bottom: 1px solid rgba(166, 207, 255, 0.3);
   transition: background 0.2s;
@@ -784,7 +791,7 @@ onUnmounted(() => {
 }
 
 .alert-col {
-  padding: 0 12px;
+  padding: 0 10px;
   display: flex;
   align-items: center;
 }
@@ -817,9 +824,9 @@ onUnmounted(() => {
 }
 
 .level-badge {
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 13px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-size: 11px;
   font-weight: 500;
 }
 
@@ -844,24 +851,24 @@ onUnmounted(() => {
 /* 图表区域 - 固定高度 */
 .chart-section {
   background: rgba(255, 255, 255, 0.9);
-  padding: 15px 18px;
-  border-radius: 10px;
+  padding: 12px 16px;
+  border-radius: 8px;
   box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.1),
-    0 2px 4px rgba(0, 0, 0, 0.06);
-  height: 200px;
+    0 3px 6px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.06);
+  height: 170px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin: 0 20px 15px 20px;
+  margin: 0 16px 12px 16px;
 }
 
 .chart-legend {
   display: flex;
-  gap: 24px;
-  margin-bottom: 10px;
-  font-size: 12px;
+  gap: 20px;
+  margin-bottom: 8px;
+  font-size: 10px;
   flex-shrink: 0;
   color: #8794A5;
 }
@@ -869,12 +876,12 @@ onUnmounted(() => {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .legend-dot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
