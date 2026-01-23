@@ -131,7 +131,7 @@ import FlowChart from './components/FlowChart.vue'
 const MAX_ALERTS = 15 // 最大异常记录数
 const MAX_FLOW_POINTS = 24 // 最大流量数据点数（24小时）
 const MAX_HISTORY_BARS = 10 // 最大历史柱状图数量
-const POPUP_AUTO_CLOSE_TIME = 3000 // 弹窗自动关闭时间(ms)
+const POPUP_AUTO_CLOSE_TIME = 2000 // 弹窗自动关闭时间(ms)
 
 // 定时器引用（用于清理）
 let timeUpdateTimer = null
@@ -210,11 +210,10 @@ const connectSSE = () => {
     }
     
     // 监听服务端推送的数据（10秒心跳 + 完整数据）
-    // 服务端应该每10秒推送一次，包含 dashboard 和 popup 的完整数据
     eventSource.addEventListener('dashboard-data-popup', (event) => {
       try {
         const data = JSON.parse(event.data)
-        console.log('收到数据推送:', data.type || 'heartbeat')
+        console.log('收到数据推送:', data.type || 'heartbeat', data)
         
         // 处理心跳消息
         if (data.type === 'heartbeat') {
@@ -224,12 +223,13 @@ const connectSSE = () => {
         
         // 处理完整数据推送
         if (data.type === 'data') {
-          // 一次性处理 dashboard 和 popup 数据
-          if (data.dashboard) {
-            handleDashboardData(data.dashboard)
+          // 处理看板数据（metrics）
+          if (data.data) {
+            handleDashboardData(data.data)
           }
-          if (data.popup ) {
-            showPersonPopup(data.popup)
+          // 处理人员进出弹窗（popup.body）
+          if (data.popup && data.popup.body) {
+            showPersonPopup(data.popup.body)
           }
         }
       } catch (err) {
@@ -285,7 +285,7 @@ const handleDashboardData = (dashboard) => {
         second: '2-digit',
         hour12: false 
       }).replace(/\//g, '-'),
-   
+      level: alert.level || '1/2/3',
       message: alert.message || alert.detail || '',
       type: alert.type || 'warning'
     }))
@@ -322,14 +322,40 @@ const showPersonPopup = (popup) => {
     popupTimer = null
   }
   
-  const actionType = popup.action || 'enter'
+  console.log('显示弹窗', popup)
+  
+  // 根据 sn 字段判断进出类型
+  // c5ce000020225c28 = 出去(exit)
+  // c5ce0000203aa438 = 进入(enter)
+  let actionType = 'enter' // 默认进入
+  if (popup.sn === 'c5ce000020225c28') {
+    actionType = 'exit'
+  } else if (popup.sn === 'c5ce0000203aa438') {
+    actionType = 'enter'
+  }
+  
+  // 直接使用图片URL（不再转换Base64）
+  const avatarUrl = popup.image 
+  
+  // 格式化时间
+  const formattedTime = popup.time 
+    ? new Date(popup.time * 1000).toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      })
+    : new Date().toLocaleString('zh-CN')
   
   popupData.value = {
-    type: actionType === 'enter' ? 'enter' : 'exit',
-    avatar: popup.avatar || 'https://via.placeholder.com/240',
+    type: actionType,
+    avatar: avatarUrl,
     name: popup.name || '访客',
-    location: popup.location || '策维3107神域',
-    time: popup.time || new Date().toLocaleTimeString(),
+    location: popup.dev_name || '策维3107神域',
+    time: formattedTime,
     todayCount: popup.todayCount || 0
   }
   
@@ -470,6 +496,7 @@ onUnmounted(() => {
   width: 2.2vw;
   height: 2.2vw;
   object-fit: contain;
+  margin-right: 3px;
 }
 
 .status-dot {
@@ -478,6 +505,7 @@ onUnmounted(() => {
   border-radius: 50%;
   background: #ccc;
   position: relative;
+  margin-right: 5px;
 }
 
 .status-dot.active {
@@ -591,7 +619,7 @@ onUnmounted(() => {
 }
 
 .stat-card {
-  height: 15vh;
+  height: 13vh;
   min-height: 130px;
   position: relative;
   background: url('./assets/images/card-bg.png') no-repeat center;
@@ -888,6 +916,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.8vw;
+  margin-right: 30px;
 }
 
 .legend-dot {
