@@ -106,7 +106,7 @@
           <!-- 欢迎信息 -->
           <div class="popup-welcome">
             <span class="popup-name">{{ popupData.name }}，</span>
-            <span class="popup-action">{{ popupData.type === 'enter' ? '欢迎进入' : '再见' }}</span>
+            <span class="popup-action">欢迎进入</span>
             <span class="popup-location">{{ popupData.location || '策维3107神域' }}</span>
           </div>
           
@@ -230,9 +230,9 @@ const connectSSE = () => {
           if (data.data) {
             handleDashboardData(data.data)
           }
-          // 处理人员进出弹窗（popup.body）
-          if (data.popup && data.popup.body) {
-            showPersonPopup(data.popup.body)
+          // 处理人员进出弹窗（popup）
+          if (data.popup) {
+            showPersonPopup(data.popup)
           }
         }
       } catch (err) {
@@ -330,12 +330,12 @@ const showPersonPopup = (popup) => {
   // 根据 sn 字段判断进出类型
   // c5ce000020225c28 = 出去(exit)
   // c5ce0000203aa438 = 进入(enter)
-  let actionType = 'enter' // 默认进入
-  if (popup.sn === 'c5ce000020225c28') {
-    actionType = 'exit'
-  } else if (popup.sn === 'c5ce0000203aa438') {
-    actionType = 'enter'
-  }
+  // let actionType = 'enter' // 默认进入
+  // if (popup.sn === 'c5ce000020225c28') {
+  //   actionType = 'exit'
+  // } else if (popup.sn === 'c5ce0000203aa438') {
+  //   actionType = 'enter'
+  // }
   
   // 直接使用图片URL（不再转换Base64）
   const avatarUrl = popup.image 
@@ -354,12 +354,12 @@ const showPersonPopup = (popup) => {
     : new Date().toLocaleString('zh-CN')
   
   popupData.value = {
-    type: actionType,
+    // type: actionType,
     avatar: avatarUrl,
     name: popup.name || '访客',
     location: popup.dev_name || '策维3107神域',
     time: formattedTime,
-    todayCount: popup.todayCount || 0
+    todayCount: popup.count || 0
   }
   
   showPopup.value = true
