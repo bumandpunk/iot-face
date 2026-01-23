@@ -34,6 +34,7 @@ const initChart = () => {
     })
     
     const option = {
+      backgroundColor: 'transparent', // 设置背景透明
       animation: false, // 禁用动画以提高性能
       grid: {
         left: '3%',

@@ -7,9 +7,7 @@
         <span class="status-dot" :class="{ active: isConnected }"></span>
         <span>捷租生态网络已覆盖</span>
       </div>
-      <div class="title-wrapper">
-        <img src="./assets/images/title-text.png" alt="3107门神域空间分析" class="title-image" />
-      </div>
+     
       <div class="datetime">{{ currentTime }}</div>
     </header>
 
@@ -22,35 +20,40 @@
           <!-- 出勤统计 -->
           <div class="stat-card card-attendance">
             <div class="stat-label">今日 应到岗/实到岗 人数</div>
-            <div class="stat-value-large">{{ stats.expectedCount }} / {{ stats.actualCount }}</div>
+            <div class="stat-value-large">
+              {{ stats.expectedCount }} / <span class="positive">{{ stats.actualCount }}</span>
+            </div>
             <div class="stat-meta">
-              到岗率 <span class="highlight">{{ stats.attendanceRate }}%</span> | 缺勤 <span class="warning">{{ stats.absent }}</span>人
+              到岗率：<span class="highlight">{{ stats.attendanceRate }}%</span> <span class="meta-item-right">缺勤人数：<span class="warning">{{ stats.absent }}</span></span>
             </div>
           </div>
 
           <!-- 空间使用率 -->
           <div class="stat-card card-space">
             <div class="stat-label">今日空间使用率</div>
+            <div class="stat-note-top">根据到岗人数/工位数计算</div>
             <div class="stat-value-large">{{ stats.spaceUsageRate }}%</div>
             <div class="stat-meta">
-              较昨日 <span class="positive">+{{ stats.rateChange }}%</span> | 峰值 <span>{{ stats.peakRate }}%</span>
+              较昨日：<span class="positive">+{{ stats.rateChange }}%</span> <span class="meta-item-right">峰值：<span class="highlight">{{ stats.peakRate }}%</span></span>
             </div>
-            <div class="stat-note">PS：根据到岗人数/工位数计算</div>
           </div>
 
           <!-- 在域内人员 -->
           <div class="stat-card card-inside">
             <div class="stat-label">今日域内人员</div>
+            <!-- <div class="stat-note-top">域内人员：职工、拜访者、面试者等</div> -->
             <div class="stat-value-medium">{{ stats.currentInside }}</div>
-            <div class="stat-note">PS：域内人员：职工、拜访者、面试者等</div>
+            <div class="stat-meta-bottom">
+              已离开：<span class="warning">28</span> <span class="meta-item-right">在域：<span class="highlight">14</span></span>
+            </div>
           </div>
 
           <!-- 进出总次数 -->
           <div class="stat-card card-inout">
             <div class="stat-label">今日进出总人次</div>
-            <div class="stat-value-large">{{ stats.totalInOut }}</div>
+            <div class="stat-value-large">{{ stats.totalInOut.toLocaleString() }}</div>
             <div class="stat-meta">
-              进入 <span class="positive">{{ stats.enterCount }}</span> | 离开 <span>{{ stats.exitCount }}</span>
+              进入：<span class="positive">{{ stats.enterCount }}</span> <span class="meta-item-right">离开：<span class="warning">{{ stats.exitCount }}</span></span>
             </div>
           </div>
         </div>
@@ -131,7 +134,7 @@ import FlowChart from './components/FlowChart.vue'
 const MAX_ALERTS = 15 // 最大异常记录数
 const MAX_FLOW_POINTS = 24 // 最大流量数据点数（24小时）
 const MAX_HISTORY_BARS = 10 // 最大历史柱状图数量
-const POPUP_AUTO_CLOSE_TIME = 2000 // 弹窗自动关闭时间(ms)
+const POPUP_AUTO_CLOSE_TIME = 3000 // 弹窗自动关闭时间(ms)
 
 // 定时器引用（用于清理）
 let timeUpdateTimer = null
@@ -456,7 +459,11 @@ onUnmounted(() => {
   gap: 0;
   overflow: hidden;
   box-sizing: border-box;
-  background: linear-gradient(180deg, #E6F1FF 0%, #F5FBFF 99.65%);
+  background-image: url('./assets/images/bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   /* 使用固定像素而不是vw */
   font-size: 1vw;
 }
@@ -488,7 +495,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 1vw;
   font-size: 1.1vw;
-  color: #000000;
+  color: #FFFFFF;
   font-weight: 500;
 }
 
@@ -563,7 +570,7 @@ onUnmounted(() => {
 
 .datetime {
   font-size: 1vw;
-  color: #000000;
+  color: #FFFFFF;
   font-weight: 500;
   padding: 0.6vh 1.2vw;
   background: transparent;
@@ -584,11 +591,27 @@ onUnmounted(() => {
 .section-title {
   font-size: 1.2vw;
   font-weight: 500;
-  color: #000000;
+  color: #FFFFFF;
   margin-bottom: 1.5vh;
   padding-bottom: 0;
+  padding-left: 2vw;
   border-bottom: none;
   flex-shrink: 0;
+  position: relative;
+}
+
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.5vw;
+  height: 1.5vw;
+  background-image: url('./assets/images/title-icon.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 /* 统计区域 - 保持65% */
@@ -619,19 +642,17 @@ onUnmounted(() => {
 }
 
 .stat-card {
-  height: 13vh;
-  min-height: 130px;
+  height: 18vh;
+  /* min-height: 140px; */
   position: relative;
-  background: url('./assets/images/card-bg.png') no-repeat center;
-  background-size: cover;
-  border-radius: 1vh;
-  border: none;
+  background: linear-gradient(180deg, rgba(74, 57, 29, 0.3) 0%, rgba(36, 22, 4, 0.8) 100%);
+  border: 2px solid rgba(209, 166, 102, 0.5);
+  /* border-radius: 1vh; */
   overflow: hidden;
-  margin-bottom:20px;
+  margin-bottom: 20px;
   box-shadow: 
-    0 0.4vh 0.8vh rgba(0, 0, 0, 0.1),
-    0 0.2vh 0.4vh rgba(0, 0, 0, 0.06),
-    inset 0 0.1vh 0 rgba(255, 255, 255, 0.5);
+    0 0 20px rgba(209, 166, 102, 0.15),
+    inset 0 0 30px rgba(209, 166, 102, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -674,38 +695,49 @@ onUnmounted(() => {
 
 .stat-card.card-inside .stat-value-medium {
   left: 50%;
-  top: 50%;
+  top: 52%;
   transform: translate(-50%, -50%);
-}
-
-.stat-card.card-inside .stat-note {
-  left: 50%;
-  top: auto;
-  bottom: 8%;
-  transform: translateX(-50%);
-  text-align: center;
-  max-width: 90%;
 }
 
 .stat-label {
   position: absolute;
   left: 40.9%;
   top: 12%;
-  font-size: 1vw;
-  color: #000000;
-  font-weight: 500;
+  font-size: 1.1vw;
+  color: #FFFFFF;
+  font-weight: 400;
   white-space: nowrap;
+}
+
+/* 标题下方的提示文字 */
+.stat-note-top {
+  position: absolute;
+  left: 40.9%;
+  top: 26%;
+  font-size: 0.7vw;
+  color: rgba(209, 166, 102, 0.7);
+  white-space: nowrap;
+  font-weight: 300;
+}
+
+/* 居中卡片的标题下提示 - 紧贴标题下方 */
+.stat-card.card-inside .stat-note-top {
+  left: 50%;
+  top: 24%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 0.65vw;
 }
 
 .stat-value-large {
   position: absolute;
   left: 40.9%;
-  top: 32%;
-  font-size: 2.4vw;
-  font-weight: 400;
-  color: #1F7FED;
+  top: 40%;
+  font-size: 3vw;
+  font-weight: 700;
+  color: rgba(209, 166, 102, 1);
   line-height: 1.2;
-  font-family: 'YouSheBiaoTiYuan', -apple-system, sans-serif;
+  font-family: 'DINAlternate-Bold', 'YouSheBiaoTiYuan', -apple-system, sans-serif;
 }
 
 .stat-value-medium {
@@ -713,33 +745,38 @@ onUnmounted(() => {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 3.2vw;
-  font-weight: 400;
-  color: #1F7FED;
+  font-size: 4vw;
+  font-weight: 700;
+  color: rgba(209, 166, 102, 1);
   line-height: 1.2;
-  font-family: 'YouSheBiaoTiYuan', -apple-system, sans-serif;
+  font-family: 'DINAlternate-Bold', 'YouSheBiaoTiYuan', -apple-system, sans-serif;
 }
 
 .stat-meta {
   position: absolute;
   left: 40.9%;
-  top: 68%;
-  font-size: 0.8vw;
-  color: #8794A5;
+  top: 72%;
+  font-size: 0.85vw;
+  color: rgba(209, 166, 102, 0.8);
   white-space: nowrap;
+  font-weight: 400;
 }
 
-.stat-note {
+/* 底部元数据（用于居中卡片） */
+.stat-meta-bottom {
   position: absolute;
-  left: 40.9%;
+  left: 50%;
   bottom: 8%;
-  font-size: 0.75vw;
-  color: #8794A5;
+  transform: translateX(-50%);
+  font-size: 0.85vw;
+  color: rgba(209, 166, 102, 0.8);
   white-space: nowrap;
+  font-weight: 400;
+  text-align: center;
 }
 
 .highlight {
-  color: #1F7FED;
+  color: rgba(209, 166, 102, 1);
   font-weight: 600;
 }
 
@@ -749,8 +786,13 @@ onUnmounted(() => {
 }
 
 .positive {
-  color: #00BD4B;
-  font-weight: 600;
+  color: rgba(20, 204, 94, 1);
+  font-weight: 700;
+}
+
+/* 底部元数据右侧项 - 增加左边距 */
+.meta-item-right {
+  margin-left: 1.5vw;
 }
 
 /* 异常记录 - 调整为35%，固定高度不撑开 */
@@ -767,32 +809,36 @@ onUnmounted(() => {
   width: 31%;
   flex-shrink: 0;
   margin-left: 25px;
+  
 }
 
 /* 异常告警表格 - 控制高度，只显示5条数据 */
 .alert-table {
   flex: 0 1 auto;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 1vh;
+  background: transparent;
+  /* border-radius: 1vh; */
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  border: 0.1vh solid rgba(166, 207, 255, 0.5);
-  box-shadow: 
-    0 0.4vh 0.8vh rgba(0, 0, 0, 0.1),
-    0 0.2vh 0.4vh rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: none;
   min-height: 0;
   max-height: fit-content;
+  background: linear-gradient(180deg, rgba(74, 57, 29, 0) 0%, rgba(36, 22, 4, 1) 99.65%);
+
+border-width: 1px ;
+border-style: solid;
+border-color: rgba(105, 81, 37, 1);
 }
 
 .alert-table-header {
   display: flex;
-  background: #ffffff;
+  background: transparent;
   padding: 1.2vh 0;
   font-size: 0.9vw;
   font-weight: 400;
-  color: #8794A5;
-  border-bottom: 0.2vh solid rgba(166, 207, 255, 1);
+  color: #FFFFFF;
+  border-bottom: 0.2vh solid rgba(255, 255, 255, 0.3);
   flex-shrink: 0;
 }
 
@@ -813,14 +859,14 @@ onUnmounted(() => {
   display: flex;
   padding: 1vh 0;
   font-size: 0.95vw;
-  color: #333;
-  border-bottom: 0.1vh solid rgba(166, 207, 255, 0.3);
+  color: #FFFFFF;
+  border-bottom: 0.1vh solid rgba(255, 255, 255, 0.1);
   transition: background 0.2s;
   flex-shrink: 0;
 }
 
 .alert-table-row:hover {
-  background: #f9f9f9;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .alert-table-row:last-child {
@@ -837,13 +883,13 @@ onUnmounted(() => {
   width: 12%;
   min-width: 60px;
   justify-content: center;
-  color: #000000;
+  color: #FFFFFF;
   font-weight: 500;
 }
 
 .col-time {
   width: 45%;
-  color: #000000;
+  color: #FFFFFF;
   font-weight: 400;
 }
 
@@ -856,7 +902,7 @@ onUnmounted(() => {
 
 .col-detail {
   width: 36%;
-  color: #000000;
+  color: #FFFFFF;
   font-weight: 400;
 }
 
@@ -887,12 +933,12 @@ onUnmounted(() => {
 
 /* 图表区域 - 扩大高度，占据更多空间 */
 .chart-section {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 1.5vh 2vw;
+  background: transparent;  /* 完全透明 */
+  /* background: rgba(255, 255, 255, 0.3); */ /* 更透明的选项 */
+  /* background: none; */ /* 完全去掉背景 */
+  /* padding: 1.5vh 2vw; */
   border-radius: 1vh;
-  box-shadow: 
-    0 0.4vh 0.8vh rgba(0, 0, 0, 0.1),
-    0 0.2vh 0.4vh rgba(0, 0, 0, 0.06);
+  box-shadow: none;  /* 去掉阴影让效果更干净 */
   flex: 1;
   min-height: 20vh;
   max-height: 35vh;
@@ -909,14 +955,14 @@ onUnmounted(() => {
   margin-bottom: 1vh;
   font-size: 0.9vw;
   flex-shrink: 0;
-  color: #8794A5;
+  color: #FFFFFF;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
   gap: 0.8vw;
-  margin-right: 30px;
+  margin-left: 32px;
 }
 
 .legend-dot {
@@ -975,7 +1021,7 @@ onUnmounted(() => {
 .popup-avatar {
   width: 100%;
   height: 100%;
-  border: 5px solid #1F7FED;
+  border: 5px solid #efab18;
   border-radius: 8px;
   overflow: hidden;
   background: #000;
@@ -1006,7 +1052,7 @@ onUnmounted(() => {
 }
 
 .popup-location {
-  color: #1F7FED;
+  color: rgba(209, 166, 102, 1);
   font-weight: 600;
 }
 
@@ -1033,7 +1079,7 @@ onUnmounted(() => {
 .popup-footer-value {
   font-size: 18px;
   font-weight: 600;
-  color: #1F7FED;
+  color: rgba(209, 166, 102, 1);
 }
 
 /* 进入和退出的不同样式 */
