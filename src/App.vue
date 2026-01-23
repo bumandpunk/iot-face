@@ -177,7 +177,7 @@ const alerts = ref([
 
 // 流量数据
 const flowData = ref({
-  times: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'],
+  times: ['08:00', '09:00','10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', ],
   inside: [25, 35, 42, 38, 45, 40, 28],
   enter: [20, 25, 30, 28, 32, 30, 22],
   exit: [15, 18, 22, 25, 28, 35, 40]
@@ -646,7 +646,7 @@ onUnmounted(() => {
   /* min-height: 140px; */
   position: relative;
   background: linear-gradient(180deg, rgba(74, 57, 29, 0.3) 0%, rgba(36, 22, 4, 0.8) 100%);
-  border: 2px solid rgba(209, 166, 102, 0.5);
+  border: 1px solid rgba(105, 81, 37, 1);
   /* border-radius: 1vh; */
   overflow: hidden;
   margin-bottom: 20px;
@@ -820,7 +820,7 @@ onUnmounted(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(105, 81, 37, 1);
   box-shadow: none;
   min-height: 0;
   max-height: fit-content;
@@ -857,7 +857,7 @@ border-color: rgba(105, 81, 37, 1);
 
 .alert-table-row {
   display: flex;
-  padding: 1vh 0;
+  padding: 1.2vh 0;
   font-size: 0.95vw;
   color: #FFFFFF;
   border-bottom: 0.1vh solid rgba(255, 255, 255, 0.1);
@@ -970,6 +970,7 @@ border-color: rgba(105, 81, 37, 1);
   height: 0.9vw;
   border-radius: 50%;
   flex-shrink: 0;
+  margin-right: 4px;
 }
 
 .legend-dot.orange {

@@ -53,7 +53,7 @@ const initChart = () => {
           }
         },
         axisLabel: {
-          color: '#8794A5',
+          color: 'rgba(166, 207, 255, 0.8)',
           fontSize: 11
         }
       },
@@ -61,12 +61,12 @@ const initChart = () => {
         type: 'value',
         splitLine: {
           lineStyle: {
-            color: 'rgba(166, 207, 255, 0.3)',
+            color: 'rgba(166, 207, 255, 0.8)',
             type: 'dashed'
           }
         },
         axisLabel: {
-          color: '#8794A5',
+          color: 'rgba(207, 218, 232, 1)',
           fontSize: 11
         }
       },
@@ -75,11 +75,12 @@ const initChart = () => {
           name: '在域人员',
           type: 'line',
           data: props.chartData.inside,
-          smooth: true,
+          // smooth: true,
           lineStyle: {
             color: '#FF7F50',
-            width: 3
+            width: 2
           },
+          symbol: 'none',
           itemStyle: {
             color: '#FF7F50'
           },
@@ -101,12 +102,13 @@ const initChart = () => {
           name: '进入人员',
           type: 'line',
           data: props.chartData.enter,
-          smooth: true,
+          // smooth: true,
           lineStyle: {
             color: '#1F7FED',
-            width: 3,
-            type: 'dashed'
+            width: 2,
+           
           },
+          symbol: 'none',
           itemStyle: {
             color: '#1F7FED'
           }
@@ -115,12 +117,13 @@ const initChart = () => {
           name: '出去人员',
           type: 'line',
           data: props.chartData.exit,
-          smooth: true,
+          // smooth: true,
           lineStyle: {
             color: '#00BD4B',
-            width: 3,
-            type: 'dashed'
+            width: 2,
+           
           },
+          symbol: 'none',
           itemStyle: {
             color: '#00BD4B'
           }
