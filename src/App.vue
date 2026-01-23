@@ -21,10 +21,10 @@
           <div class="stat-card card-attendance">
             <div class="stat-label">今日 应到岗/实到岗 人数</div>
             <div class="stat-value-large">
-              {{ stats.expectedCount }} / <span class="positive">{{ stats.actualCount }}</span>
+              {{ stats.scheduledCount }} / <span class="positive">{{ stats.actualCount }}</span>
             </div>
             <div class="stat-meta">
-              到岗率：<span class="highlight">{{ stats.attendanceRate }}%</span> <span class="meta-item-right">缺勤人数：<span class="warning">{{ stats.absent }}</span></span>
+              到岗率：<span class="highlight">{{ stats.attendanceRate }}%</span> <span class="meta-item-right">缺勤人数：<span class="warning">{{ stats.absentCount }}</span></span>
             </div>
           </div>
 
@@ -34,26 +34,26 @@
             <div class="stat-note-top">根据到岗人数/工位数计算</div>
             <div class="stat-value-large">{{ stats.spaceUsageRate }}%</div>
             <div class="stat-meta">
-              较昨日：<span class="positive">+{{ stats.rateChange }}%</span> <span class="meta-item-right">峰值：<span class="highlight">{{ stats.peakRate }}%</span></span>
+              较昨日：<span class="positive">+{{ stats.yesterdayChange }}%</span> 
             </div>
           </div>
 
           <!-- 在域内人员 -->
           <div class="stat-card card-inside">
             <div class="stat-label">今日域内人员</div>
-            <!-- <div class="stat-note-top">域内人员：职工、拜访者、面试者等</div> -->
-            <div class="stat-value-medium">{{ stats.currentInside }}</div>
+           
+            <div class="stat-value-medium">{{ stats.todayTotalPeople }}</div>
             <div class="stat-meta-bottom">
-              已离开：<span class="warning">28</span> <span class="meta-item-right">在域：<span class="highlight">14</span></span>
+              已离开：<span class="warning">{{ stats.leftCount }}</span> <span class="meta-item-right">在域：<span class="highlight">{{ stats.inDomainCount }}</span></span>
             </div>
           </div>
 
           <!-- 进出总次数 -->
           <div class="stat-card card-inout">
             <div class="stat-label">今日进出总人次</div>
-            <div class="stat-value-large">{{ stats.totalInOut.toLocaleString() }}</div>
+            <div class="stat-value-large">{{ stats.totalEntryExit.toLocaleString() }}</div>
             <div class="stat-meta">
-              进入：<span class="positive">{{ stats.enterCount }}</span> <span class="meta-item-right">离开：<span class="warning">{{ stats.exitCount }}</span></span>
+              进入：<span class="positive">{{ stats.entryCount }}</span> <span class="meta-item-right">离开：<span class="warning">{{ stats.exitCount }}</span></span>
             </div>
           </div>
         </div>
@@ -113,7 +113,7 @@
           <!-- 底部信息 -->
           <div class="popup-footer">
             <div class="popup-footer-item">
-              <span class="popup-footer-label">签到时间：</span>
+              <span class="popup-footer-label">时间：</span>
               <span class="popup-footer-value">{{ popupData.time }}</span>
             </div>
             <div class="popup-footer-item">
@@ -152,18 +152,18 @@ const isConnected = ref(false)
 
 // 统计数据
 const stats = ref({
-  expectedCount: 256,
-  actualCount: 243,
-  attendanceRate: 94.9,
-  absent: 13,
-  spaceUsageRate: 78.5,
-  rateChange: 3.2,
-  peakRate: 92,
-  currentInside: 42,
-  insideHistory: [60, 45, 55, 70, 50, 65, 48],
-  totalInOut: 1842,
-  enterCount: 923,
-  exitCount: 919
+  scheduledCount: 256,      // 今日应到岗人数(原expectedCount)
+  actualCount: 243,          // 今日实到岗人数
+  attendanceRate: 94.9,      // 到岗率
+  absentCount: 13,           // 缺勤人数(原absent)
+  spaceUsageRate: 78.5,      // 今日空间使用率
+  yesterdayChange: 3.2,      // 较昨日变化(原rateChange)
+  todayTotalPeople: 42,      // 今日域内人员(原currentInside)
+  leftCount: 28,             // 已离开
+  inDomainCount: 14,         // 在域
+  totalEntryExit: 1842,      // 今日进出总人次(原totalInOut)
+  entryCount: 923,           // 进入(原enterCount)
+  exitCount: 919             // 离开
 })
 
 // 异常记录
@@ -177,10 +177,10 @@ const alerts = ref([
 
 // 流量数据
 const flowData = ref({
-  times: ['08:00', '09:00','10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', ],
-  inside: [25, 35, 42, 38, 45, 40, 28],
-  enter: [20, 25, 30, 28, 32, 30, 22],
-  exit: [15, 18, 22, 25, 28, 35, 40]
+  times: ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'],
+  inside: [25, 35, 42, 38, 45, 40, 28, 50, 55, 48, 52],
+  enter: [20, 25, 30, 28, 32, 30, 22, 35, 38, 33, 36],
+  exit: [15, 18, 22, 25, 28, 35, 40, 30, 28, 32, 35]
 })
 
 // 弹窗数据
@@ -263,21 +263,16 @@ const connectSSE = () => {
 
 // 处理看板数据更新
 const handleDashboardData = (dashboard) => {
-  console.log('更新看板数据')
+  console.log('更新看板数据', dashboard)
   
-  // 更新统计数据（直接替换，不累积）
+  // 更新统计数据
   if (dashboard.stats) {
-    // 限制 insideHistory 数组大小
-    if (dashboard.stats.insideHistory && dashboard.stats.insideHistory.length > MAX_HISTORY_BARS) {
-      dashboard.stats.insideHistory = dashboard.stats.insideHistory.slice(-MAX_HISTORY_BARS)
-    }
     Object.assign(stats.value, dashboard.stats)
   }
   
-  // 更新异常告警（严格限制数组大小）
-  if (dashboard.alerts && Array.isArray(dashboard.alerts)) {
-    // 只保留最新的 MAX_ALERTS 条记录
-    const newAlerts = dashboard.alerts.slice(0, MAX_ALERTS).map((alert, index) => ({
+  // 更新异常告警
+  if (dashboard.alerts?.length) {
+    alerts.value = dashboard.alerts.slice(0, MAX_ALERTS).map((alert, index) => ({
       id: alert.id || Date.now() + index,
       time: alert.time || new Date().toLocaleString('zh-CN', { 
         year: 'numeric', 
@@ -288,32 +283,19 @@ const handleDashboardData = (dashboard) => {
         second: '2-digit',
         hour12: false 
       }).replace(/\//g, '-'),
-      level: alert.level || '1/2/3',
       message: alert.message || alert.detail || '',
       type: alert.type || 'warning'
     }))
-    alerts.value = newAlerts
   }
   
-  // 更新流量数据（限制数据点数量）
+  // 更新流量数据
   if (dashboard.flowData) {
-    const flowDataCopy = { ...dashboard.flowData }
-    
-    // 限制每个数组的长度
-    if (flowDataCopy.times && flowDataCopy.times.length > MAX_FLOW_POINTS) {
-      flowDataCopy.times = flowDataCopy.times.slice(-MAX_FLOW_POINTS)
+    flowData.value = {
+      times: dashboard.flowData.times?.slice(-MAX_FLOW_POINTS) || [],
+      inside: dashboard.flowData.inside?.slice(-MAX_FLOW_POINTS) || [],
+      enter: dashboard.flowData.enter?.slice(-MAX_FLOW_POINTS) || [],
+      exit: dashboard.flowData.exit?.slice(-MAX_FLOW_POINTS) || []
     }
-    if (flowDataCopy.inside && flowDataCopy.inside.length > MAX_FLOW_POINTS) {
-      flowDataCopy.inside = flowDataCopy.inside.slice(-MAX_FLOW_POINTS)
-    }
-    if (flowDataCopy.enter && flowDataCopy.enter.length > MAX_FLOW_POINTS) {
-      flowDataCopy.enter = flowDataCopy.enter.slice(-MAX_FLOW_POINTS)
-    }
-    if (flowDataCopy.exit && flowDataCopy.exit.length > MAX_FLOW_POINTS) {
-      flowDataCopy.exit = flowDataCopy.exit.slice(-MAX_FLOW_POINTS)
-    }
-    
-    flowData.value = flowDataCopy
   }
 }
 
@@ -327,15 +309,7 @@ const showPersonPopup = (popup) => {
   
   console.log('显示弹窗', popup)
   
-  // 根据 sn 字段判断进出类型
-  // c5ce000020225c28 = 出去(exit)
-  // c5ce0000203aa438 = 进入(enter)
-  // let actionType = 'enter' // 默认进入
-  // if (popup.sn === 'c5ce000020225c28') {
-  //   actionType = 'exit'
-  // } else if (popup.sn === 'c5ce0000203aa438') {
-  //   actionType = 'enter'
-  // }
+
   
   // 直接使用图片URL（不再转换Base64）
   const avatarUrl = popup.image 
@@ -354,7 +328,7 @@ const showPersonPopup = (popup) => {
     : new Date().toLocaleString('zh-CN')
   
   popupData.value = {
-    // type: actionType,
+    type: actionType,
     avatar: avatarUrl,
     name: popup.name || '访客',
     location: popup.dev_name || '策维3107神域',
@@ -388,29 +362,10 @@ onMounted(() => {
       console.warn('无法保持屏幕常亮:', err)
     })
   }
-  
+})
   // 禁用右键菜单（电视环境）
   document.addEventListener('contextmenu', (e) => e.preventDefault())
   
-  // 内存监控（开发环境）
-  if (import.meta.env.DEV && performance.memory) {
-    const logMemory = () => {
-      console.log('内存使用:', {
-        used: (performance.memory.usedJSHeapSize / 1048576).toFixed(2) + 'MB',
-        total: (performance.memory.totalJSHeapSize / 1048576).toFixed(2) + 'MB',
-        limit: (performance.memory.jsHeapSizeLimit / 1048576).toFixed(2) + 'MB'
-      })
-    }
-    
-    // 立即输出一次
-    logMemory()
-    
-    // 每5分钟输出一次内存使用情况
-    setInterval(logMemory, 5 * 60 * 1000)
-  }
-  
-  console.log('应用已启动，当前环境：', import.meta.env.MODE)
-})
 
 onUnmounted(() => {
   // 清理时间定时器
@@ -442,7 +397,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 基础重置 - 使用绝对单位避免缩放 */
+
 * {
   -webkit-text-size-adjust: none !important;
   -ms-text-size-adjust: none !important;
@@ -468,7 +423,7 @@ onUnmounted(() => {
   font-size: 1vw;
 }
 
-/* 头部 - 使用vh，增加高度 */
+
 .dashboard-header {
   display: flex;
   justify-content: space-between;
