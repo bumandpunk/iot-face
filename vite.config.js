@@ -15,7 +15,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'http://10.10.50.2:6160',
+        target: 'http://10.10.30.249:30345',
         changeOrigin: true,
         ws: true, // 支持websocket
         configure: (proxy, options) => {
