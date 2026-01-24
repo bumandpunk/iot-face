@@ -31,7 +31,7 @@
           <!-- 空间使用率 -->
           <div class="stat-card card-space">
             <div class="stat-label">今日空间使用率</div>
-            <div class="stat-note-top">根据到岗人数/工位数计算</div>
+            <div class="stat-note-top">说明:根据到岗人数/工位数计算</div>
             <div class="stat-value-large">{{ stats.spaceUsageRate }}%</div>
             <div class="stat-meta">
               较昨日：<span class="positive">{{ stats.yesterdayChange }}%</span> 
@@ -40,11 +40,14 @@
 
           <!-- 在域内人员 -->
           <div class="stat-card card-inside">
-            <div class="stat-label">今日域内人员</div>
+            <div class="stat-label">当前在域人员</div>
+             <div class="stat-note-top">说明:A类在职员工,B类供应商,C类访客</div>
+            <div class="stat-value-large">{{ stats.inDomainCount }}</div>
+            <div class="stat-meta">
+            访域人员：<span class="highlight">{{ stats.todayTotalPeople }}</span> 
+            <span class="meta-item-right"> 已离开：<span class="warning">{{ stats.leftCount }}</span> </span>
            
-            <div class="stat-value-medium">{{ stats.todayTotalPeople }}</div>
-            <div class="stat-meta-bottom">
-              已离开：<span class="warning">{{ stats.leftCount }}</span> <span class="meta-item-right">在域：<span class="highlight">{{ stats.inDomainCount }}</span></span>
+           
             </div>
           </div>
 
@@ -87,7 +90,7 @@
       <div class="chart-legend">
         <span class="legend-item"><i class="legend-dot orange"></i>在域人员</span>
         <span class="legend-item"><i class="legend-dot blue"></i>进入人员</span>
-        <span class="legend-item"><i class="legend-dot green"></i>出去人员</span>
+        <span class="legend-item"><i class="legend-dot green"></i>离开人员</span>
       </div>
       <FlowChart :chartData="flowData" />
     </section>
@@ -110,7 +113,8 @@
           <!-- 欢迎信息 -->
           <div class="popup-welcome">
             <span class="popup-name">{{ popupData.name }}，</span>
-            <span class="popup-action">欢迎进入</span>
+            <span class="popup-action" v-if="popupData.personType==0">欢迎进入</span>
+            <span class="popup-action" v-else>尊敬的供应商，欢迎进入</span>
             <span class="popup-location">{{ popupData.location || '策维3107神域' }}</span>
           </div>
           
@@ -178,11 +182,11 @@ const stats = ref({
 
 // 异常记录
 const alerts = ref([
-  { id: 1, time: '2026-01-21 14:02:43',  message: '3107入口', type: 'warning' },
-  { id: 2, time: '2026-01-21 14:02:43',  message: '3107入口', type: 'warning' },
-  { id: 3, time: '2026-01-21 14:02:43',  message: '3107入口', type: 'warning' },
-  { id: 4, time: '2026-01-21 14:02:43',  message: '3107入口', type: 'warning' },
-  { id: 5, time: '2026-01-21 14:02:43',  message: '3107入口', type: 'warning' }
+  { id: 1, time: '/',  message: '/', type: 'warning' },
+  { id: 2, time: '/',  message: '/', type: 'warning' },
+  { id: 3, time: '/',  message: '/', type: 'warning' },
+  { id: 4, time: '/',  message: '/', type: 'warning' },
+  { id: 5, time: '/',  message: '/', type: 'warning' }
 ])
 
 // 流量数据
@@ -201,7 +205,8 @@ const popupData = ref({
   name: '',
   location: '策维3107神域',
   time: '',
-  todayCount: 0
+  todayCount: 0,
+  personType:0 
 })
 
 // SSE连接
@@ -433,7 +438,8 @@ const showPersonPopup = (popup) => {
     name: popup.name || '访客',
     location: popup.dev_name || popup.location || '策维3107神域',
     time: formattedTime,
-    todayCount: popup.count || 0
+    todayCount: popup.count || 0,
+    personType:0
   }
   
   console.log('✅ 弹窗数据已设置:', popupData.value)
@@ -783,18 +789,6 @@ onUnmounted(() => {
   background-image: url('./assets/images/icon-inout.png');
 }
 
-/* 特殊卡片：今日域内人员（居中布局，保留图标） */
-.stat-card.card-inside .stat-label {
-  left: 50%;
-  top: 12%;
-  transform: translateX(-50%);
-}
-
-.stat-card.card-inside .stat-value-medium {
-  left: 50%;
-  top: 52%;
-  transform: translate(-50%, -50%);
-}
 
 .stat-label {
   position: absolute;
@@ -806,25 +800,23 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 
-/* 标题下方的提示文字 */
+/* 标题下方的提示文字 - 统一放在右上角空白处，支持换行 */
 .stat-note-top {
   position: absolute;
-  left: 40.9%;
-  top: 26%;
-  font-size: 0.7vw;
+  right: 3%;
+  top: 8%;
+  max-width: 18%;
+  font-size: 0.65vw;
   color: rgba(209, 166, 102, 0.7);
-  white-space: nowrap;
+  white-space: normal;
   font-weight: 300;
+  text-align: left;
+  line-height: 1.4;
+  background: rgba(140, 95, 10, 0.6);
+  border-radius: 4px;
+  padding: 3px;
 }
 
-/* 居中卡片的标题下提示 - 紧贴标题下方 */
-.stat-card.card-inside .stat-note-top {
-  left: 50%;
-  top: 24%;
-  transform: translateX(-50%);
-  text-align: center;
-  font-size: 0.65vw;
-}
 
 .stat-value-large {
   position: absolute;
@@ -852,7 +844,7 @@ onUnmounted(() => {
 .stat-meta {
   position: absolute;
   left: 40.9%;
-  top: 72%;
+  top: 77%;
   font-size: 0.85vw;
   color: rgba(209, 166, 102, 0.8);
   white-space: nowrap;
@@ -903,9 +895,9 @@ onUnmounted(() => {
   flex-direction: column;
   min-height: 0;
   max-height: 100%;
-  width: 31%;
+  width: 30%;
   flex-shrink: 0;
-  margin-left: 25px;
+  margin-left: 26px;
   
 }
 
@@ -947,7 +939,7 @@ border-color: rgba(105, 81, 37, 1);
 
 .alert-table-row {
   display: flex;
-  padding: 1.2vh 0;
+  padding: 1.4vh 0;
   font-size: 0.95vw;
   color: #FFFFFF;
   border-bottom: 0.1vh solid rgba(255, 255, 255, 0.1);
@@ -967,6 +959,8 @@ border-color: rgba(105, 81, 37, 1);
   padding: 0.5vw 1vw;
   display: flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .col-index {
@@ -981,6 +975,7 @@ border-color: rgba(105, 81, 37, 1);
   width: 45%;
   color: #FFFFFF;
   font-weight: 400;
+  justify-content: center;
 }
 
 .col-level {
@@ -994,6 +989,7 @@ border-color: rgba(105, 81, 37, 1);
   width: 36%;
   color: #FFFFFF;
   font-weight: 400;
+  justify-content: center;
 }
 
 .level-badge {

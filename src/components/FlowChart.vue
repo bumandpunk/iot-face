@@ -114,7 +114,7 @@ const initChart = () => {
           }
         },
         {
-          name: '出去人员',
+          name: '离开人员',
           type: 'line',
           data: props.chartData.exit,
           // smooth: true,
