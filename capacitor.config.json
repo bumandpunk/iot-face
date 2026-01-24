@@ -1,6 +1,6 @@
 {
   "appId": "com.iotface.dashboard",
-  "appName": "门禁看板",
+  "appName": "门神域",
   "webDir": "dist",
   "server": {
     "androidScheme": "https",
