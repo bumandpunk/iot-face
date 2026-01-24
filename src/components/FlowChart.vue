@@ -49,7 +49,7 @@ const initChart = () => {
         boundaryGap: false,
         axisLine: {
           lineStyle: {
-            color: 'rgba(166, 207, 255, 1)'
+            color: 'rgba(166, 207, 255, 0.8)'
           }
         },
         axisLabel: {
@@ -66,7 +66,7 @@ const initChart = () => {
           }
         },
         axisLabel: {
-          color: 'rgba(207, 218, 232, 1)',
+          color: 'rgba(207, 218, 232, 0.8)',
           fontSize: 11
         }
       },

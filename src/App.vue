@@ -34,7 +34,7 @@
             <div class="stat-note-top">根据到岗人数/工位数计算</div>
             <div class="stat-value-large">{{ stats.spaceUsageRate }}%</div>
             <div class="stat-meta">
-              较昨日：<span class="positive">+{{ stats.yesterdayChange }}%</span> 
+              较昨日：<span class="positive">{{ stats.yesterdayChange }}%</span> 
             </div>
           </div>
 
@@ -51,7 +51,7 @@
           <!-- 进出总次数 -->
           <div class="stat-card card-inout">
             <div class="stat-label">今日进出总人次</div>
-            <div class="stat-value-large">{{ stats.totalEntryExit.toLocaleString() }}</div>
+            <div class="stat-value-large">{{ stats.totalEntryExit }}</div>
             <div class="stat-meta">
               进入：<span class="positive">{{ stats.entryCount }}</span> <span class="meta-item-right">离开：<span class="warning">{{ stats.exitCount }}</span></span>
             </div>
@@ -99,7 +99,11 @@
           <!-- 头像区域 -->
           <div class="popup-avatar-wrapper">
             <div class="popup-avatar">
-              <img :src="popupData.avatar" alt="avatar" />
+              <img 
+                :src="popupData.avatar || '/default-avatar.png'" 
+                alt="avatar"
+                @error="(e) => e.target.src = '/default-avatar.png'"
+              />
             </div>
           </div>
           
@@ -133,12 +137,18 @@ import FlowChart from './components/FlowChart.vue'
 // 常量配置
 const MAX_ALERTS = 15 // 最大异常记录数
 const MAX_FLOW_POINTS = 24 // 最大流量数据点数（24小时）
-const MAX_HISTORY_BARS = 10 // 最大历史柱状图数量
 const POPUP_AUTO_CLOSE_TIME = 3000 // 弹窗自动关闭时间(ms)
+const MAX_RECONNECT_ATTEMPTS = 10 // 最大重连次数
+const INITIAL_RECONNECT_DELAY = 5000 // 初始重连延迟(ms)
+const MAX_RECONNECT_DELAY = 60000 // 最大重连延迟(ms)
 
 // 定时器引用（用于清理）
 let timeUpdateTimer = null
 let popupTimer = null
+let wakeLock = null // 屏幕锁引用
+let reconnectAttempts = 0 // 重连尝试次数
+let reconnectDelay = INITIAL_RECONNECT_DELAY // 当前重连延迟
+let alertIdCounter = 1 // 告警ID计数器
 
 // 时间显示
 const currentTime = ref('')
@@ -152,27 +162,27 @@ const isConnected = ref(false)
 
 // 统计数据
 const stats = ref({
-  scheduledCount: 256,      // 今日应到岗人数(原expectedCount)
-  actualCount: 243,          // 今日实到岗人数
-  attendanceRate: 94.9,      // 到岗率
-  absentCount: 13,           // 缺勤人数(原absent)
-  spaceUsageRate: 78.5,      // 今日空间使用率
-  yesterdayChange: 3.2,      // 较昨日变化(原rateChange)
-  todayTotalPeople: 42,      // 今日域内人员(原currentInside)
-  leftCount: 28,             // 已离开
-  inDomainCount: 14,         // 在域
-  totalEntryExit: 1842,      // 今日进出总人次(原totalInOut)
-  entryCount: 923,           // 进入(原enterCount)
-  exitCount: 919             // 离开
+  scheduledCount: 0,      // 今日应到岗人数(原expectedCount)
+  actualCount: 0,          // 今日实到岗人数
+  attendanceRate: 0,      // 到岗率
+  absentCount: 0,           // 缺勤人数(原absent)
+  spaceUsageRate: 0,      // 今日空间使用率
+  yesterdayChange:0,      // 较昨日变化(原rateChange)
+  todayTotalPeople: 0,      // 今日域内人员(原currentInside)
+  leftCount: 0,             // 已离开
+  inDomainCount: 0,         // 在域
+  totalEntryExit: 0,      // 今日进出总人次(原totalInOut)
+  entryCount: 0,           // 进入(原enterCount)
+  exitCount: 0             // 离开
 })
 
 // 异常记录
 const alerts = ref([
-  { id: 1, time: '2026-01-21 14:02:43',  message: '门口监控1', type: 'warning' },
-  { id: 2, time: '2026-01-21 14:02:43',  message: '门口监控1', type: 'warning' },
-  { id: 3, time: '2026-01-21 14:02:43',  message: '门口监控1', type: 'warning' },
-  { id: 4, time: '2026-01-21 14:02:43',  message: '门口监控1', type: 'warning' },
-  { id: 5, time: '2026-01-21 14:02:43',  message: '门口监控1', type: 'warning' }
+  { id: 1, time: '2026-01-21 14:02:43',  message: '3107入口', type: 'warning' },
+  { id: 2, time: '2026-01-21 14:02:43',  message: '3107入口', type: 'warning' },
+  { id: 3, time: '2026-01-21 14:02:43',  message: '3107入口', type: 'warning' },
+  { id: 4, time: '2026-01-21 14:02:43',  message: '3107入口', type: 'warning' },
+  { id: 5, time: '2026-01-21 14:02:43',  message: '3107入口', type: 'warning' }
 ])
 
 // 流量数据
@@ -199,7 +209,20 @@ let eventSource = null
 let reconnectTimer = null
 
 const connectSSE = () => {
+  // 检查是否超过最大重连次数
+  if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+    console.error('SSE重连次数已达上限，停止重连')
+    isConnected.value = false
+    return
+  }
+
   try {
+    // 关闭旧连接（避免内存泄漏）
+    if (eventSource) {
+      eventSource.close()
+      eventSource = null
+    }
+
     // 开发环境使用代理，生产环境使用完整URL
     const sseUrl = import.meta.env.MODE === 'development' 
       ? '/api/sse/connect' 
@@ -210,13 +233,16 @@ const connectSSE = () => {
     eventSource.onopen = () => {
       console.log('SSE连接成功')
       isConnected.value = true
+      // 重置重连计数和延迟
+      reconnectAttempts = 0
+      reconnectDelay = INITIAL_RECONNECT_DELAY
     }
     
     // 监听服务端推送的数据（10秒心跳 + 完整数据）
     eventSource.addEventListener('dashboard-data-popup', (event) => {
       try {
         const data = JSON.parse(event.data)
-        console.log('收到数据推送:', data.type || 'heartbeat', data)
+        console.log('🔔 收到SSE数据推送:', data.type || 'heartbeat', data)
         
         // 处理心跳消息
         if (data.type === 'heartbeat') {
@@ -226,17 +252,21 @@ const connectSSE = () => {
         
         // 处理完整数据推送
         if (data.type === 'data') {
+          console.log('📊 处理数据推送 - data存在:', !!data.data, 'popup存在:', !!data.popup)
+          
           // 处理看板数据（metrics）
           if (data.data) {
+            console.log('📈 开始更新看板数据:', data.data)
             handleDashboardData(data.data)
           }
           // 处理人员进出弹窗（popup）
           if (data.popup) {
+            console.log('👤 显示人员弹窗:', data.popup)
             showPersonPopup(data.popup)
           }
         }
       } catch (err) {
-        console.error('SSE消息解析失败:', err)
+        console.error('❌ SSE消息解析失败:', err)
       }
     })
     
@@ -244,16 +274,34 @@ const connectSSE = () => {
       console.error('SSE连接错误:', error)
       isConnected.value = false
       
+      // 关闭当前连接
+      if (eventSource) {
+        eventSource.close()
+        eventSource = null
+      }
+      
       // 清理旧的重连定时器
       if (reconnectTimer) {
         clearTimeout(reconnectTimer)
+        reconnectTimer = null
       }
       
-      // 5秒后重连
+      // 检查是否达到最大重连次数
+      if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+        console.error('SSE重连次数已达上限，停止重连')
+        return
+      }
+      
+      // 增加重连次数
+      reconnectAttempts++
+      
+      // 指数退避重连策略
+      console.log(`尝试第 ${reconnectAttempts} 次重连SSE (延迟 ${reconnectDelay}ms)...`)
       reconnectTimer = setTimeout(() => {
-        console.log('尝试重新连接SSE...')
         connectSSE()
-      }, 5000)
+        // 下次延迟时间翻倍，但不超过最大值
+        reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY)
+      }, reconnectDelay)
     }
   } catch (err) {
     console.error('EventSource 初始化失败:', err)
@@ -261,89 +309,172 @@ const connectSSE = () => {
   }
 }
 
+// 格式化时间工具函数
+const formatDateTime = (timestamp) => {
+  const date = timestamp ? new Date(timestamp * 1000) : new Date()
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).replace(/\//g, '-')
+}
+
 // 处理看板数据更新
 const handleDashboardData = (dashboard) => {
-  console.log('更新看板数据', dashboard)
+  console.log('🔄 更新看板数据 - 原始数据:', dashboard)
   
-  // 更新统计数据
-  if (dashboard.stats) {
-    Object.assign(stats.value, dashboard.stats)
+  // 更新统计数据（支持两种数据结构）
+  // 1. 新结构: { scheduledCount, actualCount, ... }
+  // 2. 旧结构: { stats: { scheduledCount, actualCount, ... } }
+  const statsData = dashboard
+  if (statsData && typeof statsData === 'object') {
+    console.log('📝 准备更新的统计数据:', statsData)
+    console.log('📊 更新前的stats值:', JSON.stringify(stats.value))
+    
+    // 只更新存在的字段，避免覆盖未提供的数据
+    const updateFields = [
+      'scheduledCount', 'actualCount', 'attendanceRate', 'absentCount',
+      'spaceUsageRate', 'yesterdayChange', 'todayTotalPeople',
+      'leftCount', 'inDomainCount', 'totalEntryExit', 'entryCount', 'exitCount'
+    ]
+    
+    updateFields.forEach(field => {
+      if (statsData[field] !== undefined) {
+        stats.value[field] = statsData[field]
+        console.log(`  ✅ ${field}: ${statsData[field]}`)
+      }
+    })
+    
+    console.log('✨ 统计数据已更新:', JSON.stringify(stats.value))
+  } else {
+    console.warn('⚠️ statsData 无效或不是对象:', statsData)
   }
   
   // 更新异常告警
   if (dashboard.alerts?.length) {
-    alerts.value = dashboard.alerts.slice(0, MAX_ALERTS).map((alert, index) => ({
-      id: alert.id || Date.now() + index,
-      time: alert.time || new Date().toLocaleString('zh-CN', { 
-        year: 'numeric', 
-        month: '2-digit', 
-        day: '2-digit', 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit',
-        hour12: false 
-      }).replace(/\//g, '-'),
+    alerts.value = dashboard.alerts.slice(0, MAX_ALERTS).map((alert) => ({
+      id: alert.id || `alert-${alertIdCounter++}`,
+      time: alert.time || formatDateTime(),
       message: alert.message || alert.detail || '',
       type: alert.type || 'warning'
     }))
+    console.log('🚨 异常告警已更新:', alerts.value.length, '条')
   }
   
-  // 更新流量数据
-  if (dashboard.flowData) {
+  // 更新流量数据（支持两种数据源）
+  // 1. 新结构: statistics 数组 [{timeRange, enterCount, exitCount, areaCount}]
+  // 2. 旧结构: flowData 对象 {times, inside, enter, exit}
+  if (dashboard.statistics?.length) {
+    console.log('📊 从 statistics 数组提取流量数据:', dashboard.statistics)
+    
+    const times = []
+    const inside = []
+    const enter = []
+    const exit = []
+    
+    // 遍历 statistics 数组，提取数据
+    dashboard.statistics.slice(-MAX_FLOW_POINTS).forEach(item => {
+      // timeRange 格式: "01:00-02:00"，取开始时间 "01:00"
+      times.push(item.timeRange?.split('-')[0] || '')
+      enter.push(item.enterCount || 0)
+      exit.push(item.exitCount || 0)
+      inside.push(item.areaCount || 0)
+    })
+    
+    flowData.value = { times, inside, enter, exit }
+    console.log('📉 流量数据已更新 (来自statistics):', {
+      数据点数: times.length,
+      时间范围: times[0] + ' ~ ' + times[times.length - 1]
+    })
+  } else if (dashboard.flowData) {
+    // 兼容旧的 flowData 格式
     flowData.value = {
       times: dashboard.flowData.times?.slice(-MAX_FLOW_POINTS) || [],
       inside: dashboard.flowData.inside?.slice(-MAX_FLOW_POINTS) || [],
       enter: dashboard.flowData.enter?.slice(-MAX_FLOW_POINTS) || [],
       exit: dashboard.flowData.exit?.slice(-MAX_FLOW_POINTS) || []
     }
+    console.log('📉 流量数据已更新 (来自flowData)')
   }
 }
 
 // 显示人员进出弹窗
 const showPersonPopup = (popup) => {
+  // 数据校验
+  if (!popup || typeof popup !== 'object') {
+    console.warn('⚠️ 弹窗数据无效', popup)
+    return
+  }
+
   // 清理之前的定时器
   if (popupTimer) {
     clearTimeout(popupTimer)
     popupTimer = null
   }
   
-  console.log('显示弹窗', popup)
+  console.log('👤 准备显示弹窗:', popup)
   
-
+  // 确定进出类型（默认为 enter）
+  const actionType = 'enter'
   
   // 直接使用图片URL（不再转换Base64）
-  const avatarUrl = popup.image 
+  const avatarUrl = popup.image || popup.avatar || ''
   
   // 格式化时间
-  const formattedTime = popup.time 
-    ? new Date(popup.time * 1000).toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      })
-    : new Date().toLocaleString('zh-CN')
+  const formattedTime = formatDateTime(popup.time)
   
   popupData.value = {
     type: actionType,
     avatar: avatarUrl,
     name: popup.name || '访客',
-    location: popup.dev_name || '策维3107神域',
+    location: popup.dev_name || popup.location || '策维3107神域',
     time: formattedTime,
     todayCount: popup.count || 0
   }
   
+  console.log('✅ 弹窗数据已设置:', popupData.value)
+  
   showPopup.value = true
+  console.log('🎉 弹窗已显示')
   
   // 自动关闭弹窗
   popupTimer = setTimeout(() => {
     showPopup.value = false
     popupTimer = null
+    console.log('⏰ 弹窗自动关闭')
   }, POPUP_AUTO_CLOSE_TIME)
 }
+
+// 请求并管理 Wake Lock
+const requestWakeLock = async () => {
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen')
+      console.log('屏幕保持常亮')
+      
+      // 监听锁释放事件
+      wakeLock.addEventListener('release', () => {
+        console.log('屏幕锁已释放')
+      })
+    } catch (err) {
+      console.warn('无法保持屏幕常亮:', err)
+    }
+  }
+}
+
+// 处理页面可见性变化（后台恢复时重新获取锁）
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible' && wakeLock === null) {
+    requestWakeLock()
+  }
+}
+
+// 阻止右键菜单（电视环境）
+const preventContextMenu = (e) => e.preventDefault()
 
 // 生命周期
 onMounted(() => {
@@ -355,17 +486,14 @@ onMounted(() => {
   connectSSE()
   
   // 阻止屏幕休眠（适用于电视）
-  if ('wakeLock' in navigator) {
-    navigator.wakeLock.request('screen').then(() => {
-      console.log('屏幕保持常亮')
-    }).catch(err => {
-      console.warn('无法保持屏幕常亮:', err)
-    })
-  }
-})
-  // 禁用右键菜单（电视环境）
-  document.addEventListener('contextmenu', (e) => e.preventDefault())
+  requestWakeLock()
   
+  // 监听页面可见性变化
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+  
+  // 禁用右键菜单（电视环境）
+  document.addEventListener('contextmenu', preventContextMenu)
+})
 
 onUnmounted(() => {
   // 清理时间定时器
@@ -391,6 +519,20 @@ onUnmounted(() => {
     eventSource.close()
     eventSource = null
   }
+  
+  // 释放屏幕锁
+  if (wakeLock) {
+    wakeLock.release().then(() => {
+      wakeLock = null
+      console.log('屏幕锁已释放')
+    }).catch(err => {
+      console.warn('释放屏幕锁失败:', err)
+    })
+  }
+  
+  // 移除事件监听器
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+  document.removeEventListener('contextmenu', preventContextMenu)
   
   console.log('应用已清理所有资源')
 })
@@ -795,13 +937,6 @@ border-color: rgba(105, 81, 37, 1);
   color: #FFFFFF;
   border-bottom: 0.2vh solid rgba(255, 255, 255, 0.3);
   flex-shrink: 0;
-}
-
-.alert-table-body {
-  flex: 0 1 auto;
-  overflow: visible;
-  min-height: 0;
-  max-height: fit-content;
 }
 
 .alert-table-body {
