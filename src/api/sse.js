@@ -6,8 +6,10 @@ export class SSEManager {
     this.url = url
     this.eventSource = null
     this.reconnectInterval = 5000
+    this.reconnectTimer = null
     this.listeners = new Map()
     this.isConnected = false
+    this.shouldReconnect = true
   }
 
   /**
@@ -15,6 +17,7 @@ export class SSEManager {
    */
   connect() {
     try {
+      this.shouldReconnect = true
       this.eventSource = new EventSource(this.url)
       
       this.eventSource.onopen = () => {
@@ -36,9 +39,17 @@ export class SSEManager {
         console.error('SSE连接错误:', error)
         this.isConnected = false
         this.emit('error', { error })
-        
+
+        if (this.eventSource) {
+          this.eventSource.close()
+          this.eventSource = null
+        }
+
+        if (!this.shouldReconnect) return
+
+        this.clearReconnectTimer()
         // 自动重连
-        setTimeout(() => {
+        this.reconnectTimer = setTimeout(() => {
           console.log('尝试重新连接...')
           this.connect()
         }, this.reconnectInterval)
@@ -100,11 +111,20 @@ export class SSEManager {
    * 关闭连接
    */
   disconnect() {
+    this.shouldReconnect = false
+    this.clearReconnectTimer()
     if (this.eventSource) {
       this.eventSource.close()
       this.eventSource = null
       this.isConnected = false
       console.log('SSE连接已关闭')
+    }
+  }
+
+  clearReconnectTimer() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer)
+      this.reconnectTimer = null
     }
   }
 }
