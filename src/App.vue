@@ -221,6 +221,31 @@ const popupData = ref({
 let eventSource = null
 let reconnectTimer = null
 
+const triggerReconnect = (reason) => {
+  // 清理旧的重连定时器
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer)
+    reconnectTimer = null
+  }
+
+  // 增加重连次数
+  reconnectAttempts += 1
+
+  // 检查是否达到最大重连次数
+  if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+    error('SSE重连次数已达上限，停止重连')
+    return
+  }
+
+  // 指数退避重连策略
+  log(`🔄 ${reason}，尝试第 ${reconnectAttempts} 次重连SSE (延迟 ${reconnectDelay}ms)...`)
+  reconnectTimer = setTimeout(() => {
+    connectSSE()
+    // 下次延迟时间翻倍，但不超过最大值
+    reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY)
+  }, reconnectDelay)
+}
+
 // 重置心跳超时定时器
 const resetHeartbeatTimer = () => {
   // 清除旧的定时器
@@ -233,6 +258,7 @@ const resetHeartbeatTimer = () => {
   heartbeatTimer = setTimeout(() => {
     warn('⚠️ 心跳超时（超过8秒未收到心跳），主动断开并重连')
     isConnected.value = false
+    stopHeartbeatTimer()
     
     // 关闭当前连接
     if (eventSource) {
@@ -241,7 +267,7 @@ const resetHeartbeatTimer = () => {
     }
     
     // 触发重连
-    connectSSE()
+    triggerReconnect('心跳超时')
   }, HEARTBEAT_TIMEOUT)
 }
 
@@ -255,7 +281,7 @@ const stopHeartbeatTimer = () => {
 
 const connectSSE = () => {
   // 检查是否超过最大重连次数
-  if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+  if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
     error('SSE重连次数已达上限，停止重连')
     isConnected.value = false
     stopHeartbeatTimer() // 停止心跳检测
@@ -336,28 +362,7 @@ const connectSSE = () => {
         eventSource = null
       }
       
-      // 清理旧的重连定时器
-      if (reconnectTimer) {
-        clearTimeout(reconnectTimer)
-        reconnectTimer = null
-      }
-      
-      // 检查是否达到最大重连次数
-      if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-        error('SSE重连次数已达上限，停止重连')
-        return
-      }
-      
-      // 增加重连次数
-      reconnectAttempts++
-      
-      // 指数退避重连策略
-      log(`🔄 尝试第 ${reconnectAttempts} 次重连SSE (延迟 ${reconnectDelay}ms)...`)
-      reconnectTimer = setTimeout(() => {
-        connectSSE()
-        // 下次延迟时间翻倍，但不超过最大值
-        reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY)
-      }, reconnectDelay)
+      triggerReconnect('SSE连接错误')
     }
   } catch (err) {
     error('EventSource 初始化失败:', err)
