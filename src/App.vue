@@ -1260,11 +1260,11 @@ border-color: rgba(105, 81, 37, 1);
 .popup-content {
   background: linear-gradient(180deg, rgba(74, 57, 29, 0.95) 0%, rgba(36, 22, 4, 0.98) 100%);
   border: 1px solid rgba(209, 166, 102, 0.5);
-  padding: 30px 40px;
-  border-radius: 8px;
+  padding: 20px 25px;
+  border-radius: 6px;
   text-align: center;
-  min-width: 900px;
-  max-width: 1000px;
+  min-width: 450px;
+  max-width: 500px;
   max-height: 85vh;
   overflow-y: auto;
   box-shadow: 
@@ -1276,20 +1276,20 @@ border-color: rgba(105, 81, 37, 1);
 /* 头像区域（带金色装饰边框） */
 .popup-avatar-wrapper {
   position: relative;
-  width: 160px;
-  height: 160px;
-  margin: 0 auto 20px;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 12px;
 }
 
 /* 金色装饰边框 */
 .popup-avatar-frame {
   position: absolute;
-  top: -12px;
-  left: -12px;
-  right: -12px;
-  bottom: -12px;
-  border: 3px solid rgba(209, 166, 102, 1);
-  border-radius: 4px;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  border: 2px solid rgba(209, 166, 102, 1);
+  border-radius: 3px;
 }
 
 /* 四个角的装饰 */
@@ -1297,21 +1297,21 @@ border-color: rgba(105, 81, 37, 1);
 .popup-avatar-frame::after {
   content: '';
   position: absolute;
-  width: 30px;
-  height: 30px;
-  border: 3px solid rgba(209, 166, 102, 1);
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(209, 166, 102, 1);
 }
 
 .popup-avatar-frame::before {
-  top: -3px;
-  left: -3px;
+  top: -2px;
+  left: -2px;
   border-right: none;
   border-bottom: none;
 }
 
 .popup-avatar-frame::after {
-  top: -3px;
-  right: -3px;
+  top: -2px;
+  right: -2px;
   border-left: none;
   border-bottom: none;
 }
@@ -1320,22 +1320,22 @@ border-color: rgba(105, 81, 37, 1);
 .popup-avatar-wrapper::after {
   content: '';
   position: absolute;
-  width: 30px;
-  height: 30px;
-  border: 3px solid rgba(209, 166, 102, 1);
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(209, 166, 102, 1);
   z-index: 1;
 }
 
 .popup-avatar-wrapper::before {
-  bottom: -15px;
-  left: -15px;
+  bottom: -10px;
+  left: -10px;
   border-right: none;
   border-top: none;
 }
 
 .popup-avatar-wrapper::after {
-  bottom: -15px;
-  right: -15px;
+  bottom: -10px;
+  right: -10px;
   border-left: none;
   border-top: none;
 }
@@ -1357,10 +1357,10 @@ border-color: rgba(105, 81, 37, 1);
 
 /* 欢迎信息 */
 .popup-welcome {
-  font-size: 26px;
+  font-size: 16px;
   font-weight: 500;
   color: #FFFFFF;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   line-height: 1.4;
 }
 
@@ -1382,24 +1382,25 @@ border-color: rgba(105, 81, 37, 1);
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 15px 0;
-  margin-bottom: 20px;
+  padding: 10px 0;
+  margin-bottom: 12px;
   border-bottom: 1px solid rgba(209, 166, 102, 0.2);
 }
 
 .popup-stat-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
+  flex-direction: column;
 }
 
 .popup-stat-label {
-  font-size: 14px;
+  font-size: 10px;
   color: rgba(209, 166, 102, 0.8);
 }
 
 .popup-stat-value {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 600;
   color: rgba(209, 166, 102, 1);
 }
@@ -1428,12 +1429,12 @@ border-color: rgba(105, 81, 37, 1);
 
 .popup-task-row {
   display: flex;
-  padding: 10px 0;
-  font-size: 13px;
+  padding: 6px 0;
+  font-size: 10px;
   color: rgba(209, 166, 102, 0.9);
   border-bottom: 1px solid rgba(209, 166, 102, 0.1);
   transition: background 0.2s;
-  min-height: 45px;
+  min-height: 30px;
 }
 
 .popup-task-row:hover {
@@ -1445,7 +1446,7 @@ border-color: rgba(105, 81, 37, 1);
 }
 
 .popup-task-col {
-  padding: 0 10px;
+  padding: 0 5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1454,50 +1455,61 @@ border-color: rgba(105, 81, 37, 1);
 
 .col-rank {
   width: 10%;
-  min-width: 50px;
+  min-width: 25px;
 }
 
 .col-project {
-  width: 20%;
-  min-width: 100px;
+  width: 15%;
+  min-width: 50px;
+  font-size: 9px;
 }
 
 .col-task {
-  width: 40%;
-  min-width: 200px;
+  width: 45%;
+  min-width: 100px;
   text-align: left;
   justify-content: flex-start;
   word-break: break-word;
-  line-height: 1.4;
+  line-height: 1.3;
+}
+
+.col-duration {
+  width: 15%;
+  min-width: 40px;
+}
+
+.col-deadline {
+  width: 15%;
+  min-width: 60px;
 }
 
 /* 无任务提示 */
 .popup-no-task {
   width: 100%;
-  padding: 40px 30px;
+  padding: 25px 15px;
   text-align: center;
   background: rgba(105, 81, 37, 0.1);
   border: 1px solid rgba(209, 166, 102, 0.2);
-  border-radius: 8px;
+  border-radius: 6px;
   margin-top: 5px;
 }
 
 .no-task-icon {
-  font-size: 60px;
-  margin-bottom: 15px;
+  font-size: 40px;
+  margin-bottom: 10px;
   opacity: 0.6;
 }
 
 .no-task-title {
-  font-size: 28px;
+  font-size: 16px;
   font-weight: 600;
   color: rgba(209, 166, 102, 1);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   line-height: 1.4;
 }
 
 .no-task-subtitle {
-  font-size: 22px;
+  font-size: 13px;
   font-weight: 400;
   color: rgba(209, 166, 102, 0.8);
   line-height: 1.4;
