@@ -122,7 +122,7 @@
           <!-- 统计信息栏 -->
           <div class="popup-stats">
             <div class="popup-stat-item">
-              <span class="popup-stat-label">时间：</span>
+              <span class="popup-stat-label">签到时间：</span>
               <span class="popup-stat-value">{{ popupData.time }}</span>
             </div>
             <div class="popup-stat-item">
@@ -153,6 +153,13 @@
                 <div class="popup-task-col col-deadline">{{ task.deadline || '-' }}</div>
               </div>
             </div>
+          </div>
+          
+          <!-- 无任务提示 -->
+          <div class="popup-no-task" v-else>
+            <div class="no-task-icon">📋</div>
+            <div class="no-task-title">你今天还没任务哦！</div>
+            <div class="no-task-subtitle">赶紧去找老大安排一下吧！</div>
           </div>
         </div>
       </div>
@@ -1253,6 +1260,8 @@ border-color: rgba(105, 81, 37, 1);
   text-align: center;
   min-width: 900px;
   max-width: 1000px;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.5),
     0 0 30px rgba(209, 166, 102, 0.15);
@@ -1409,17 +1418,17 @@ border-color: rgba(105, 81, 37, 1);
 }
 
 .popup-task-body {
-  max-height: 200px;
-  overflow-y: auto;
+  /* 不限制高度，显示所有任务 */
 }
 
 .popup-task-row {
   display: flex;
-  padding: 12px 0;
+  padding: 14px 0;
   font-size: 14px;
   color: rgba(209, 166, 102, 0.9);
   border-bottom: 1px solid rgba(209, 166, 102, 0.1);
   transition: background 0.2s;
+  min-height: 50px;
 }
 
 .popup-task-row:hover {
@@ -1453,6 +1462,40 @@ border-color: rgba(105, 81, 37, 1);
   min-width: 200px;
   text-align: left;
   justify-content: flex-start;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+/* 无任务提示 */
+.popup-no-task {
+  width: 100%;
+  padding: 50px 30px;
+  text-align: center;
+  background: rgba(105, 81, 37, 0.1);
+  border: 1px solid rgba(209, 166, 102, 0.2);
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.no-task-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.no-task-title {
+  font-size: 32px;
+  font-weight: 600;
+  color: rgba(209, 166, 102, 1);
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.no-task-subtitle {
+  font-size: 24px;
+  font-weight: 400;
+  color: rgba(209, 166, 102, 0.8);
+  line-height: 1.5;
 }
 
 .col-duration {
