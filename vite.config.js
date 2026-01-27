@@ -24,6 +24,12 @@ export default defineConfig({
             proxyReq.setHeader('Connection', 'keep-alive')
           })
         }
+      },
+      '/zt': {
+        target: 'https://tp.cewaycloud.com',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path
       }
     }
   },

@@ -99,8 +99,9 @@
     <transition name="popup">
       <div class="person-popup" v-if="showPopup">
         <div class="popup-content" :class="popupData.type">
-          <!-- 头像区域 -->
+          <!-- 头像区域（带金色装饰边框） -->
           <div class="popup-avatar-wrapper">
+            <div class="popup-avatar-frame"></div>
             <div class="popup-avatar">
               <img 
                 :src="popupData.avatar || '/default-avatar.png'" 
@@ -118,15 +119,39 @@
             <span class="popup-location">{{ popupData.location || '策维3107神域' }}</span>
           </div>
           
-          <!-- 底部信息 -->
-          <div class="popup-footer">
-            <div class="popup-footer-item">
-              <span class="popup-footer-label">时间：</span>
-              <span class="popup-footer-value">{{ popupData.time }}</span>
+          <!-- 统计信息栏 -->
+          <div class="popup-stats">
+            <div class="popup-stat-item">
+              <span class="popup-stat-label">时间：</span>
+              <span class="popup-stat-value">{{ popupData.time }}</span>
             </div>
-            <div class="popup-footer-item">
-              <span class="popup-footer-label">今日进出次数：</span>
-              <span class="popup-footer-value">{{ popupData.todayCount || 30 }}</span>
+            <div class="popup-stat-item">
+              <span class="popup-stat-label">今日进出次数：</span>
+              <span class="popup-stat-value">{{ popupData.todayCount || 0 }}</span>
+            </div>
+            <div class="popup-stat-item">
+              <span class="popup-stat-label">今日任务数：</span>
+              <span class="popup-stat-value">{{ popupData.taskCount || 0 }}</span>
+            </div>
+          </div>
+          
+          <!-- 任务列表 -->
+          <div class="popup-task-list" v-if="popupData.tasks && popupData.tasks.length">
+            <div class="popup-task-header">
+              <div class="popup-task-col col-rank">排序</div>
+              <div class="popup-task-col col-project">项目名称</div>
+              <div class="popup-task-col col-task">任务名</div>
+              <div class="popup-task-col col-duration">预计耗时</div>
+              <div class="popup-task-col col-deadline">预计完成时间</div>
+            </div>
+            <div class="popup-task-body">
+              <div class="popup-task-row" v-for="(task, index) in popupData.tasks" :key="task.id || index">
+                <div class="popup-task-col col-rank">{{ index + 1 }}</div>
+                <div class="popup-task-col col-project">{{ task.projectName || '-' }}</div>
+                <div class="popup-task-col col-task">{{ task.taskName || '-' }}</div>
+                <div class="popup-task-col col-duration">{{ task.duration || '-' }}</div>
+                <div class="popup-task-col col-deadline">{{ task.deadline || '-' }}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -214,7 +239,9 @@ const popupData = ref({
   location: '策维3107神域',
   time: '',
   todayCount: 0,
-  personType:0 
+  taskCount: 0,
+  tasks: [],
+  personType: 0 
 })
 
 // SSE连接
@@ -459,7 +486,7 @@ const handleDashboardData = (dashboard) => {
 }
 
 // 显示人员进出弹窗
-const showPersonPopup = (popup) => {
+const showPersonPopup = async (popup) => {
   // 数据校验
   if (!popup || typeof popup !== 'object') {
     warn('⚠️ 弹窗数据无效', popup)
@@ -483,6 +510,9 @@ const showPersonPopup = (popup) => {
   // 格式化时间
   const formattedTime = formatDateTime(popup.time)
   
+  // 获取任务列表（调用真实接口）
+  const tasks = await fetchPersonTasks(popup.name)
+  
   popupData.value = {
     type: actionType,
     avatar: avatarUrl,
@@ -490,6 +520,8 @@ const showPersonPopup = (popup) => {
     location: popup.dev_name || popup.location || '策维3107神域',
     time: formattedTime,
     todayCount: popup.count || 0,
+    taskCount: tasks.length,
+    tasks: tasks,
     personType: popup.personType || 0
   }
   
@@ -500,6 +532,93 @@ const showPersonPopup = (popup) => {
     showPopup.value = false
     popupTimer = null
   }, POPUP_AUTO_CLOSE_TIME)
+}
+
+// 获取人员任务列表
+const fetchPersonTasks = async (realName) => {
+  try {
+    if (!realName) {
+      warn('⚠️ 缺少姓名参数，无法获取任务列表')
+      return []
+    }
+
+    // 开发环境使用代理，生产环境使用完整URL
+    const taskApiBase = import.meta.env.MODE === 'development' 
+      ? '' 
+      : (import.meta.env.VITE_TASK_API_URL || 'https://tp.cewaycloud.com')
+    
+    const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=5&realName=${encodeURIComponent(realName)}`
+    log('📋 获取任务列表:', apiUrl)
+    
+    const response = await fetch(apiUrl)
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    }
+    
+    const result = await response.json()
+    log('📋 任务接口返回:', result)
+    
+    if (result.code !== 0) {
+      throw new Error(result.msg || '接口返回错误')
+    }
+    
+    const { data } = result
+    if (!data || !data.taskInfoVos) {
+      warn('⚠️ 任务数据格式异常:', data)
+      return []
+    }
+    
+    // 转换数据格式适配前端展示
+    const tasks = data.taskInfoVos.map(task => ({
+      id: task.id,
+      projectName: getProjectNameFromTaskName(task.name),
+      taskName: task.name,
+      duration: task.estimate ? `${task.estimate}小时` : '-',
+      deadline: task.deadline ? formatDateDeadline(task.deadline) : '-',
+      status: task.status
+    }))
+    
+    log('✅ 转换后的任务数据:', tasks)
+    return tasks
+    
+  } catch (err) {
+    error('❌ 获取任务列表失败:', err)
+    return []
+  }
+}
+
+// 从任务名称中提取项目名称
+const getProjectNameFromTaskName = (taskName) => {
+  if (!taskName) return '-'
+  
+  // 匹配格式：【分类】项目内容
+  const match = taskName.match(/^【([^】]+)】/)
+  if (match && match[1]) {
+    return match[1]
+  }
+  
+  // 如果没有找到分类，返回默认值
+  return '其他项目'
+}
+
+// 格式化截止时间
+const formatDateDeadline = (dateStr) => {
+  if (!dateStr) return '-'
+  
+  try {
+    // 假设传入格式为 "2026-01-27"
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) {
+      return dateStr // 如果无法解析，返回原字符串
+    }
+    
+    // 格式化为 "MM-DD HH:mm"
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${month}-${day} 17:30` // 默认时间设为17:30
+  } catch (err) {
+    return dateStr
+  }
 }
 
 // 请求并管理 Wake Lock
@@ -1119,7 +1238,7 @@ border-color: rgba(105, 81, 37, 1);
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(230, 241, 255, 0.95);
+  background: rgba(26, 20, 13, 0.92);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1127,33 +1246,93 @@ border-color: rgba(105, 81, 37, 1);
 }
 
 .popup-content {
-  background: #ffffff;
-  padding: 50px 80px 40px;
-  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(74, 57, 29, 0.95) 0%, rgba(36, 22, 4, 0.98) 100%);
+  border: 1px solid rgba(209, 166, 102, 0.5);
+  padding: 40px 50px;
+  border-radius: 8px;
   text-align: center;
-  min-width: 600px;
-  max-width: 700px;
-  box-shadow: 0 8px 32px rgba(31, 127, 237, 0.2);
+  min-width: 900px;
+  max-width: 1000px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(209, 166, 102, 0.15);
   position: relative;
-  border: 2px solid rgba(166, 207, 255, 0.3);
 }
 
-/* 头像区域 */
+/* 头像区域（带金色装饰边框） */
 .popup-avatar-wrapper {
   position: relative;
-  width: 200px;
-  height: 200px;
-  margin: 0 auto 28px;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 30px;
+}
+
+/* 金色装饰边框 */
+.popup-avatar-frame {
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  right: -12px;
+  bottom: -12px;
+  border: 3px solid rgba(209, 166, 102, 1);
+  border-radius: 4px;
+}
+
+/* 四个角的装饰 */
+.popup-avatar-frame::before,
+.popup-avatar-frame::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(209, 166, 102, 1);
+}
+
+.popup-avatar-frame::before {
+  top: -3px;
+  left: -3px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.popup-avatar-frame::after {
+  top: -3px;
+  right: -3px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.popup-avatar-wrapper::before,
+.popup-avatar-wrapper::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(209, 166, 102, 1);
+  z-index: 1;
+}
+
+.popup-avatar-wrapper::before {
+  bottom: -15px;
+  left: -15px;
+  border-right: none;
+  border-top: none;
+}
+
+.popup-avatar-wrapper::after {
+  bottom: -15px;
+  right: -15px;
+  border-left: none;
+  border-top: none;
 }
 
 .popup-avatar {
   width: 100%;
   height: 100%;
-  border: 5px solid #efab18;
-  border-radius: 8px;
+  border-radius: 4px;
   overflow: hidden;
   background: #000;
-  box-shadow: 0 4px 12px rgba(31, 127, 237, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .popup-avatar img {
@@ -1164,19 +1343,19 @@ border-color: rgba(105, 81, 37, 1);
 
 /* 欢迎信息 */
 .popup-welcome {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 500;
-  color: #000000;
-  margin-bottom: 28px;
+  color: #FFFFFF;
+  margin-bottom: 30px;
   line-height: 1.5;
 }
 
 .popup-name {
-  color: #000000;
+  color: #FFFFFF;
 }
 
 .popup-action {
-  color: #000000;
+  color: #FFFFFF;
 }
 
 .popup-location {
@@ -1184,34 +1363,110 @@ border-color: rgba(105, 81, 37, 1);
   font-weight: 600;
 }
 
-/* 底部信息 */
-.popup-footer {
+/* 统计信息栏 */
+.popup-stats {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding-top: 24px;
-  gap: 45px;
+  padding: 20px 0;
+  margin-bottom: 25px;
+  border-bottom: 1px solid rgba(209, 166, 102, 0.2);
 }
 
-.popup-footer-item {
+.popup-stat-item {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
 }
 
-.popup-footer-label {
+.popup-stat-label {
   font-size: 16px;
-  color: #8794A5;
+  color: rgba(209, 166, 102, 0.8);
 }
 
-.popup-footer-value {
+.popup-stat-value {
   font-size: 18px;
   font-weight: 600;
   color: rgba(209, 166, 102, 1);
 }
 
+/* 任务列表 */
+.popup-task-list {
+  width: 100%;
+  border: 1px solid rgba(209, 166, 102, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.popup-task-header {
+  display: flex;
+  background: rgba(105, 81, 37, 0.3);
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #FFFFFF;
+  border-bottom: 1px solid rgba(209, 166, 102, 0.3);
+}
+
+.popup-task-body {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.popup-task-row {
+  display: flex;
+  padding: 12px 0;
+  font-size: 14px;
+  color: rgba(209, 166, 102, 0.9);
+  border-bottom: 1px solid rgba(209, 166, 102, 0.1);
+  transition: background 0.2s;
+}
+
+.popup-task-row:hover {
+  background: rgba(209, 166, 102, 0.05);
+}
+
+.popup-task-row:last-child {
+  border-bottom: none;
+}
+
+.popup-task-col {
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.col-rank {
+  width: 10%;
+  min-width: 50px;
+}
+
+.col-project {
+  width: 20%;
+  min-width: 100px;
+}
+
+.col-task {
+  width: 40%;
+  min-width: 200px;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.col-duration {
+  width: 15%;
+  min-width: 80px;
+}
+
+.col-deadline {
+  width: 15%;
+  min-width: 120px;
+}
+
 /* 进入和退出的不同样式 */
-.popup-content.exit .popup-avatar {
+.popup-content.exit .popup-avatar-frame {
   border-color: #D43030;
 }
 
@@ -1219,7 +1474,7 @@ border-color: rgba(105, 81, 37, 1);
   color: #D43030;
 }
 
-.popup-content.exit .popup-footer-value {
+.popup-content.exit .popup-stat-value {
   color: #D43030;
 }
 
