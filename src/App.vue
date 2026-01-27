@@ -570,9 +570,15 @@ const fetchPersonTasks = async (realName) => {
     }
     
     const { data } = result
-    if (!data || !data.taskInfoVos) {
-      warn('⚠️ 任务数据格式异常:', data)
+    if (!data) {
+      warn('⚠️ 任务数据为空:', data)
       return { taskCount: 0, tasks: [] }
+    }
+
+    // taskInfoVos 可能为 null 或 undefined 或空数组
+    if (!Array.isArray(data.taskInfoVos) || data.taskInfoVos.length === 0) {
+      log('📋 该人员暂无任务')
+      return { taskCount: data.taskCount || 0, tasks: [] }
     }
     
     // 转换数据格式适配前端展示
