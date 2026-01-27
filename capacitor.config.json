@@ -5,9 +5,15 @@
   "server": {
     "androidScheme": "https",
     "hostname": "iotface.local",
-    "cleartext": true
+    "cleartext": true,
+    "allowNavigation": [
+      "https://tp.cewaycloud.com",
+      "http://10.10.30.249:30345",
+      "http://10.10.50.2:6160"
+    ]
   },
   "android": {
+    "allowMixedContent": true,
     "buildOptions": {
       "keystorePath": "",
       "keystorePassword": "",

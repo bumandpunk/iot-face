@@ -556,8 +556,12 @@ const fetchPersonTasks = async (realName) => {
     
     const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=5&realName=${encodeURIComponent(realName)}`
     log('📋 获取任务列表:', apiUrl)
+    log('📋 当前环境模式:', import.meta.env.MODE)
+    log('📋 VITE_TASK_API_URL:', import.meta.env.VITE_TASK_API_URL)
     
     const response = await fetch(apiUrl)
+    log('📋 任务接口响应状态:', response.status, response.statusText)
+    
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
@@ -601,6 +605,8 @@ const fetchPersonTasks = async (realName) => {
     
   } catch (err) {
     error('❌ 获取任务列表失败:', err)
+    error('❌ 错误详情 - name:', err.name, 'message:', err.message)
+    error('❌ 请求的URL:', `${import.meta.env.VITE_TASK_API_URL || 'https://tp.cewaycloud.com'}/zt/task/report/pageIndividualTaskReport`)
     return { taskCount: 0, tasks: [] }
   }
 }
