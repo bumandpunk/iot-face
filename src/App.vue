@@ -518,7 +518,7 @@ const showPersonPopup = async (popup) => {
   const formattedTime = formatDateTime(popup.time)
   
   // 获取任务列表（调用真实接口）
-  const tasks = await fetchPersonTasks(popup.name)
+  const taskResult = await fetchPersonTasks(popup.name)
   
   popupData.value = {
     type: actionType,
@@ -527,8 +527,8 @@ const showPersonPopup = async (popup) => {
     location: popup.dev_name || popup.location || '策维3107神域',
     time: formattedTime,
     todayCount: popup.count || 0,
-    taskCount: tasks.length,
-    tasks: tasks,
+    taskCount: taskResult.taskCount,
+    tasks: taskResult.tasks,
     personType: popup.personType || 0
   }
   
@@ -546,7 +546,7 @@ const fetchPersonTasks = async (realName) => {
   try {
     if (!realName) {
       warn('⚠️ 缺少姓名参数，无法获取任务列表')
-      return []
+      return { taskCount: 0, tasks: [] }
     }
 
     // 开发环境使用代理，生产环境使用完整URL
@@ -572,7 +572,7 @@ const fetchPersonTasks = async (realName) => {
     const { data } = result
     if (!data || !data.taskInfoVos) {
       warn('⚠️ 任务数据格式异常:', data)
-      return []
+      return { taskCount: 0, tasks: [] }
     }
     
     // 转换数据格式适配前端展示
@@ -586,11 +586,16 @@ const fetchPersonTasks = async (realName) => {
     }))
     
     log('✅ 转换后的任务数据:', tasks)
-    return tasks
+    
+    // 返回接口的taskCount和转换后的任务列表
+    return {
+      taskCount: data.taskCount || 0,
+      tasks: tasks
+    }
     
   } catch (err) {
     error('❌ 获取任务列表失败:', err)
-    return []
+    return { taskCount: 0, tasks: [] }
   }
 }
 
@@ -1255,12 +1260,12 @@ border-color: rgba(105, 81, 37, 1);
 .popup-content {
   background: linear-gradient(180deg, rgba(74, 57, 29, 0.95) 0%, rgba(36, 22, 4, 0.98) 100%);
   border: 1px solid rgba(209, 166, 102, 0.5);
-  padding: 40px 50px;
+  padding: 30px 40px;
   border-radius: 8px;
   text-align: center;
   min-width: 900px;
   max-width: 1000px;
-  max-height: 90vh;
+  max-height: 85vh;
   overflow-y: auto;
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.5),
@@ -1271,9 +1276,9 @@ border-color: rgba(105, 81, 37, 1);
 /* 头像区域（带金色装饰边框） */
 .popup-avatar-wrapper {
   position: relative;
-  width: 220px;
-  height: 220px;
-  margin: 0 auto 30px;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 20px;
 }
 
 /* 金色装饰边框 */
@@ -1352,11 +1357,11 @@ border-color: rgba(105, 81, 37, 1);
 
 /* 欢迎信息 */
 .popup-welcome {
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 500;
   color: #FFFFFF;
-  margin-bottom: 30px;
-  line-height: 1.5;
+  margin-bottom: 20px;
+  line-height: 1.4;
 }
 
 .popup-name {
@@ -1377,8 +1382,8 @@ border-color: rgba(105, 81, 37, 1);
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 20px 0;
-  margin-bottom: 25px;
+  padding: 15px 0;
+  margin-bottom: 20px;
   border-bottom: 1px solid rgba(209, 166, 102, 0.2);
 }
 
@@ -1389,12 +1394,12 @@ border-color: rgba(105, 81, 37, 1);
 }
 
 .popup-stat-label {
-  font-size: 16px;
+  font-size: 14px;
   color: rgba(209, 166, 102, 0.8);
 }
 
 .popup-stat-value {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: rgba(209, 166, 102, 1);
 }
@@ -1410,8 +1415,8 @@ border-color: rgba(105, 81, 37, 1);
 .popup-task-header {
   display: flex;
   background: rgba(105, 81, 37, 0.3);
-  padding: 12px 0;
-  font-size: 15px;
+  padding: 10px 0;
+  font-size: 14px;
   font-weight: 500;
   color: #FFFFFF;
   border-bottom: 1px solid rgba(209, 166, 102, 0.3);
@@ -1423,12 +1428,12 @@ border-color: rgba(105, 81, 37, 1);
 
 .popup-task-row {
   display: flex;
-  padding: 14px 0;
-  font-size: 14px;
+  padding: 10px 0;
+  font-size: 13px;
   color: rgba(209, 166, 102, 0.9);
   border-bottom: 1px solid rgba(209, 166, 102, 0.1);
   transition: background 0.2s;
-  min-height: 50px;
+  min-height: 45px;
 }
 
 .popup-task-row:hover {
@@ -1469,33 +1474,33 @@ border-color: rgba(105, 81, 37, 1);
 /* 无任务提示 */
 .popup-no-task {
   width: 100%;
-  padding: 50px 30px;
+  padding: 40px 30px;
   text-align: center;
   background: rgba(105, 81, 37, 0.1);
   border: 1px solid rgba(209, 166, 102, 0.2);
   border-radius: 8px;
-  margin-top: 10px;
+  margin-top: 5px;
 }
 
 .no-task-icon {
-  font-size: 80px;
-  margin-bottom: 20px;
+  font-size: 60px;
+  margin-bottom: 15px;
   opacity: 0.6;
 }
 
 .no-task-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   color: rgba(209, 166, 102, 1);
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   line-height: 1.4;
 }
 
 .no-task-subtitle {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 400;
   color: rgba(209, 166, 102, 0.8);
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .col-duration {
