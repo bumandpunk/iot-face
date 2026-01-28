@@ -6,6 +6,14 @@
         <img src="./assets/images/logo-network.png" alt="logo" class="network-logo" />
         <span class="status-dot" :class="{ active: isConnected }"></span>
         <span>捷租生态网络已覆盖</span>
+        <div class="api-status">
+          <span class="api-status-item" :class="apiStatus.internal ? 'connected' : 'disconnected'">
+            内网API {{ apiStatus.internal ? '✓' : '✗' }}
+          </span>
+          <span class="api-status-item" :class="apiStatus.external ? 'connected' : 'disconnected'">
+            外网API {{ apiStatus.external ? '✓' : '✗' }}
+          </span>
+        </div>
       </div>
      
       <div class="datetime">{{ currentTime }}</div>
@@ -209,6 +217,12 @@ const updateTime = () => {
 
 // 连接状态
 const isConnected = ref(false)
+
+// API连接状态
+const apiStatus = ref({
+  internal: false,  // 内网API状态
+  external: false   // 外网API状态
+})
 
 // 统计数据
 const stats = ref({
@@ -503,7 +517,6 @@ const handleDashboardData = (dashboard) => {
 const showPersonPopup = async (popup) => {
   // 数据校验
   if (!popup || typeof popup !== 'object') {
-    warn('⚠️ 弹窗数据无效', popup)
     return
   }
 
@@ -512,8 +525,6 @@ const showPersonPopup = async (popup) => {
     clearTimeout(popupTimer)
     popupTimer = null
   }
-  
-  log('👤 准备显示弹窗:', popup.name)
   
   // 确定进出类型（默认为 enter）
   const actionType = 'enter'
@@ -527,17 +538,7 @@ const showPersonPopup = async (popup) => {
   // 标记正在加载任务
   isLoadingTasks.value = true
   
-  // 获取任务列表（调用真实接口）
-  const taskResult = await fetchPersonTasks(popup.name)
-  
-  // 标记加载完成
-  isLoadingTasks.value = false
-  
-  log('👤 fetchPersonTasks 返回结果:', taskResult)
-  log('👤 taskCount:', taskResult.taskCount)
-  log('👤 tasks数组:', taskResult.tasks)
-  log('👤 tasks长度:', taskResult.tasks?.length)
-  
+  // 先设置基础信息，让弹窗显示
   popupData.value = {
     type: actionType,
     avatar: avatarUrl,
@@ -545,16 +546,22 @@ const showPersonPopup = async (popup) => {
     location: popup.dev_name || popup.location || '策维3107神域',
     time: formattedTime,
     todayCount: popup.count || 0,
-    taskCount: taskResult.taskCount,
-    tasks: taskResult.tasks,
+    taskCount: 0,
+    tasks: [],
     personType: popup.personType || 0
   }
   
-  log('👤 设置后的 popupData.value:', JSON.stringify(popupData.value))
-  log('👤 popupData.value.tasks:', popupData.value.tasks)
-  log('👤 popupData.value.tasks.length:', popupData.value.tasks?.length)
-  
   showPopup.value = true
+  
+  // 获取任务列表（异步，不阻塞弹窗显示）
+  const taskResult = await fetchPersonTasks(popup.name)
+  
+  // 标记加载完成
+  isLoadingTasks.value = false
+  
+  // 更新任务数据
+  popupData.value.taskCount = taskResult.taskCount
+  popupData.value.tasks = taskResult.tasks
   
   // 自动关闭弹窗
   popupTimer = setTimeout(() => {
@@ -709,11 +716,72 @@ const handleVisibilityChange = () => {
 // 阻止右键菜单（电视环境）
 const preventContextMenu = (e) => e.preventDefault()
 
+// 测试API连通性
+const testApiConnectivity = async () => {
+  const testName = '张富杰'
+  const encodedName = encodeURIComponent(testName)
+  
+  // 测试内网API
+  try {
+    const internalUrl = `http://10.10.30.249:32547/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=5&realName=${encodedName}`
+    const xhr = new XMLHttpRequest()
+    
+    await new Promise((resolve) => {
+      xhr.timeout = 5000
+      xhr.onload = () => {
+        apiStatus.value.internal = xhr.status === 200
+        resolve()
+      }
+      xhr.onerror = () => {
+        apiStatus.value.internal = false
+        resolve()
+      }
+      xhr.ontimeout = () => {
+        apiStatus.value.internal = false
+        resolve()
+      }
+      xhr.open('GET', internalUrl, true)
+      xhr.send()
+    })
+  } catch (err) {
+    apiStatus.value.internal = false
+  }
+  
+  // 测试外网API
+  try {
+    const externalUrl = `https://tp.cewaycloud.com/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=5&realName=${encodedName}`
+    const xhr = new XMLHttpRequest()
+    
+    await new Promise((resolve) => {
+      xhr.timeout = 5000
+      xhr.onload = () => {
+        apiStatus.value.external = xhr.status === 200
+        resolve()
+      }
+      xhr.onerror = () => {
+        apiStatus.value.external = false
+        resolve()
+      }
+      xhr.ontimeout = () => {
+        apiStatus.value.external = false
+        resolve()
+      }
+      xhr.open('GET', externalUrl, true)
+      xhr.send()
+    })
+  } catch (err) {
+    apiStatus.value.external = false
+  }
+}
+
 // 生命周期
 onMounted(() => {
   // 启动时间更新定时器
   updateTime()
   timeUpdateTimer = setInterval(updateTime, 1000)
+  
+  // 测试API连通性
+  testApiConnectivity()
   
   // 连接SSE
   connectSSE()
@@ -825,6 +893,34 @@ onUnmounted(() => {
   font-size: 1.1vw;
   color: #FFFFFF;
   font-weight: 500;
+  flex-wrap: wrap;
+}
+
+.api-status {
+  display: flex;
+  gap: 0.8vw;
+  margin-left: 1vw;
+  font-size: 0.9vw;
+}
+
+.api-status-item {
+  padding: 0.3vh 0.6vw;
+  border-radius: 3px;
+  font-size: 0.85vw;
+  font-weight: 400;
+  transition: all 0.3s;
+}
+
+.api-status-item.connected {
+  background: rgba(82, 196, 26, 0.2);
+  color: #52c41a;
+  border: 1px solid rgba(82, 196, 26, 0.5);
+}
+
+.api-status-item.disconnected {
+  background: rgba(245, 34, 45, 0.2);
+  color: #f5222d;
+  border: 1px solid rgba(245, 34, 45, 0.5);
 }
 
 .network-logo {
