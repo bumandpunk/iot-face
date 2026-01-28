@@ -199,7 +199,6 @@
 </template>
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import axios from 'axios'
 import FlowChart from './components/FlowChart.vue'
 
 // 常量配置
@@ -607,22 +606,30 @@ const fetchPersonTasks = async (realName) => {
     const isDevelopment = import.meta.env.MODE === 'development'
     const taskApiBase = isDevelopment ? '' : (import.meta.env.VITE_TASK_API_URL || 'http://10.10.30.249:32547')
     
-    const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport`
+    // 构建完整 URL
+    const params = new URLSearchParams({
+      pageNum: 1,
+      pageSize: 5,
+      realName: realName
+    })
+    const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport?${params.toString()}`
     
-    const response = await axios.get(apiUrl, {
-      params: {
-        pageNum: 1,
-        pageSize: 5,
-        realName: realName
-      },
-      timeout: 10000,
+    // 使用 fetch API (WebView 原生支持更好)
+    const response = await fetch(apiUrl, {
+      method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json;charset=UTF-8'
-      }
+      },
+      mode: 'cors',
+      cache: 'no-cache'
     })
     
-    const result = response.data
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    }
+    
+    const result = await response.json()
     
     if (result.code !== 0) {
       return { taskCount: 0, tasks: [] }
@@ -657,10 +664,10 @@ const fetchPersonTasks = async (realName) => {
     // 在弹窗中显示任务API错误
     errorDialog.value = {
       show: true,
-      url: err.config?.url || '任务API',
-      type: `任务API错误 - ${err.code || 'Unknown'}`,
+      url: err.url || '任务API',
+      type: `任务API错误 - fetch`,
       message: err.message || '未知错误',
-      env: `axios.isAxiosError=${axios.isAxiosError(err)}, response=${!!err.response}, request=${!!err.request}`
+      env: `fetch API error, name=${err.name}, stack前50字符=${err.stack?.substring(0, 50)}`
     }
     return { taskCount: 0, tasks: [] }
   }
@@ -736,21 +743,28 @@ const testApiConnectivity = async () => {
   const testInternalApi = async () => {
     try {
       const baseUrl = isDevelopment ? '' : 'http://10.10.30.249:32547'
-      const url = `${baseUrl}/zt/task/report/pageIndividualTaskReport`
+      const params = new URLSearchParams({
+        pageNum: 1,
+        pageSize: 1,
+        realName: testName
+      })
+      const url = `${baseUrl}/zt/task/report/pageIndividualTaskReport?${params.toString()}`
       
-      const response = await axios.get(url, {
-        params: {
-          pageNum: 1,
-          pageSize: 1,
-          realName: testName
-        },
-        timeout: 5000,
+      // 使用 fetch API 替代 axios
+      const response = await fetch(url, {
+        method: 'GET',
         headers: {
           'Accept': 'application/json'
-        }
+        },
+        mode: 'cors',
+        cache: 'no-cache'
       })
       
-      const result = response.data
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+      
+      const result = await response.json()
       apiStatus.value.internal = result.code === 0
       
     } catch (err) {
@@ -761,39 +775,25 @@ const testApiConnectivity = async () => {
       let errorMessage = err.message || '未知错误'
       let additionalInfo = ''
       
-      if (axios.isAxiosError(err)) {
-        if (err.response) {
-          // 服务器返回了错误响应
-          errorType = '内网API - HTTP错误'
-          errorMessage = `HTTP ${err.response.status}: ${err.response.statusText}`
-          additionalInfo = `Response data: ${JSON.stringify(err.response.data)}`
-        } else if (err.request) {
-          // 请求已发出,但没有收到响应
-          errorType = '内网API - 网络错误(无响应)'
-          errorMessage = '请求已发送,但服务器未响应'
-          additionalInfo = `Request: ${err.request._url || err.config?.url || 'Unknown'}`
-        } else {
-          // 请求配置出错
-          errorType = '内网API - 请求配置错误'
-          errorMessage = err.message
-        }
-      }
-      
-      if (err.code === 'ECONNABORTED') {
-        errorType = '内网API - 请求超时'
-        errorMessage = '连接超时(5秒)'
-      } else if (err.code === 'ERR_NETWORK') {
-        errorType = '内网API - 网络错误'
-        errorMessage = '网络连接失败,可能被WebView安全策略阻止'
+      if (err.name === 'TypeError') {
+        errorType = '内网API - 网络错误(TypeError)'
+        errorMessage = 'fetch 请求失败,可能是网络不可达或被 CORS 策略阻止'
+        additionalInfo = `原始错误: ${err.message}`
+      } else if (err.name === 'AbortError') {
+        errorType = '内网API - 请求中断'
+        errorMessage = '请求被中断或超时'
+      } else if (err.message.includes('HTTP')) {
+        errorType = '内网API - HTTP错误'
+        additionalInfo = err.message
       }
       
       // 显示详细错误弹窗
       errorDialog.value = {
         show: true,
-        url: err.config?.url || 'http://10.10.30.249:32547/zt/task/report/pageIndividualTaskReport',
+        url: 'http://10.10.30.249:32547/zt/task/report/pageIndividualTaskReport',
         type: errorType,
         message: `${errorMessage}\n${additionalInfo}`,
-        env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}, MODE=${import.meta.env.MODE}, isAxiosError=${axios.isAxiosError(err)}, code=${err.code || 'none'}`
+        env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}, MODE=${import.meta.env.MODE}, fetch API, error.name=${err.name}`
       }
     }
   }
