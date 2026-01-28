@@ -19,6 +19,21 @@
       <div class="datetime">{{ currentTime }}</div>
     </header>
 
+    <!-- 错误提示弹窗 -->
+    <div v-if="errorDialog.show" class="error-dialog">
+      <div class="error-dialog-content">
+        <div class="error-dialog-header">⚠️ API 调用错误</div>
+        <div class="error-dialog-body">
+          <p><strong>请求URL:</strong></p>
+          <p class="error-url">{{ errorDialog.url }}</p>
+          <p><strong>错误类型:</strong> {{ errorDialog.type }}</p>
+          <p><strong>错误信息:</strong> {{ errorDialog.message }}</p>
+          <p><strong>环境变量:</strong> {{ errorDialog.env }}</p>
+        </div>
+        <button class="error-dialog-close" @click="errorDialog.show = false">关闭</button>
+      </div>
+    </div>
+
     <!-- 主内容区 -->
     <div class="dashboard-content">
       <!-- 左侧统计区域 -->
@@ -222,6 +237,15 @@ const isConnected = ref(false)
 const apiStatus = ref({
   internal: false,  // 内网API状态
   external: false   // 外网API状态
+})
+
+// 错误对话框
+const errorDialog = ref({
+  show: false,
+  url: '',
+  type: '',
+  message: '',
+  env: ''
 })
 
 // 统计数据
@@ -738,59 +762,52 @@ const testApiConnectivity = async () => {
             apiStatus.value.internal = result.code === 0
           } catch (err) {
             apiStatus.value.internal = false
+            // 显示错误弹窗
+            errorDialog.value = {
+              show: true,
+              url: url,
+              type: '内网API - 解析错误',
+              message: err.message,
+              env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}`
+            }
           }
         } else {
           apiStatus.value.internal = false
-        }
-        resolve()
-      }
-      
-      xhr.onerror = () => {
-        apiStatus.value.internal = false
-        resolve()
-      }
-      
-      xhr.ontimeout = () => {
-        apiStatus.value.internal = false
-        resolve()
-      }
-      
-      xhr.open('GET', url, true)
-      xhr.setRequestHeader('Accept', 'application/json')
-      xhr.send()
-    })
-  }
-  
-  // 测试外网API
-  const testExternalApi = () => {
-    return new Promise((resolve) => {
-      const baseUrl = isDevelopment ? '' : 'https://tp.cewaycloud.com'
-      const url = `${baseUrl}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=1&realName=${encodedName}`
-      const xhr = new XMLHttpRequest()
-      
-      xhr.timeout = 5000
-      
-      xhr.onload = function() {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const result = JSON.parse(xhr.responseText)
-            apiStatus.value.external = result.code === 0
-          } catch (err) {
-            apiStatus.value.external = false
+          // 显示错误弹窗
+          errorDialog.value = {
+            show: true,
+            url: url,
+            type: '内网API - HTTP错误',
+            message: `HTTP ${xhr.status}: ${xhr.statusText}`,
+            env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}`
           }
-        } else {
-          apiStatus.value.external = false
         }
         resolve()
       }
       
       xhr.onerror = () => {
-        apiStatus.value.external = false
+        apiStatus.value.internal = false
+        // 显示错误弹窗
+        errorDialog.value = {
+          show: true,
+          url: url,
+          type: '内网API - 网络错误',
+          message: `无法连接到服务器（readyState: ${xhr.readyState}, status: ${xhr.status}）`,
+          env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}, MODE=${import.meta.env.MODE}`
+        }
         resolve()
       }
       
       xhr.ontimeout = () => {
-        apiStatus.value.external = false
+        apiStatus.value.internal = false
+        // 显示错误弹窗
+        errorDialog.value = {
+          show: true,
+          url: url,
+          type: '内网API - 超时',
+          message: '请求超时（5秒）',
+          env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}`
+        }
         resolve()
       }
       
@@ -800,11 +817,8 @@ const testApiConnectivity = async () => {
     })
   }
   
-  // 并行测试两个API
-  await Promise.all([
-    testInternalApi(),
-    testExternalApi()
-  ])
+  // 并行测试（暂时只测试内网）
+  await testInternalApi()
 }
 
 // 生命周期
@@ -1747,6 +1761,80 @@ border-color: rgba(105, 81, 37, 1);
 
 .popup-content.exit .popup-stat-value {
   color: #D43030;
+}
+
+/* 错误对话框 */
+.error-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.error-dialog-content {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 3vh 2vw;
+  border-radius: 12px;
+  max-width: 60vw;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.error-dialog-header {
+  font-size: 1.5vw;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 2vh;
+  text-align: center;
+}
+
+.error-dialog-body {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2vh 1.5vw;
+  border-radius: 8px;
+  margin-bottom: 2vh;
+  color: #fff;
+  font-size: 1vw;
+  line-height: 1.8;
+}
+
+.error-dialog-body p {
+  margin: 1vh 0;
+}
+
+.error-dialog-body strong {
+  color: #ffd700;
+}
+
+.error-url {
+  word-break: break-all;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1vh;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9vw;
+}
+
+.error-dialog-close {
+  width: 100%;
+  padding: 1vh;
+  background: #f5222d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.2vw;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.error-dialog-close:hover {
+  background: #cf1322;
+  transform: scale(1.02);
 }
 
 /* 弹窗动画 */
