@@ -3,15 +3,10 @@
   "appName": "门神域",
   "webDir": "dist",
   "server": {
-    "androidScheme": "file",
+    "androidScheme": "https",
+    "iosScheme": "https",
     "hostname": "localhost",
-    "cleartext": true,
-    "allowNavigation": [
-      "http://10.10.30.249:32547/*",
-      "http://10.10.30.249:30345/*",
-      "http://10.10.50.2:*/*",
-      "*"
-    ]
+    "cleartext": true
   },
   "android": {
     "allowMixedContent": true,
