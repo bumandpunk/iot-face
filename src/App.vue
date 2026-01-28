@@ -199,6 +199,7 @@
 </template>
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { CapacitorHttp } from '@capacitor/core'
 import FlowChart from './components/FlowChart.vue'
 
 // 常量配置
@@ -607,29 +608,18 @@ const fetchPersonTasks = async (realName) => {
     const taskApiBase = isDevelopment ? '' : (import.meta.env.VITE_TASK_API_URL || 'http://10.10.30.249:32547')
     
     // 构建完整 URL
-    const params = new URLSearchParams({
-      pageNum: 1,
-      pageSize: 5,
-      realName: realName
-    })
-    const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport?${params.toString()}`
+    const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=5&realName=${encodeURIComponent(realName)}`
     
-    // 使用 fetch API (WebView 原生支持更好)
-    const response = await fetch(apiUrl, {
-      method: 'GET',
+    // 使用 Capacitor 原生 HTTP 插件（绕过 WebView 限制）
+    const response = await CapacitorHttp.get({
+      url: apiUrl,
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json;charset=UTF-8'
-      },
-      mode: 'cors',
-      cache: 'no-cache'
+      }
     })
     
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-    }
-    
-    const result = await response.json()
+    const result = response.data
     
     if (result.code !== 0) {
       return { taskCount: 0, tasks: [] }
@@ -665,9 +655,9 @@ const fetchPersonTasks = async (realName) => {
     errorDialog.value = {
       show: true,
       url: err.url || '任务API',
-      type: `任务API错误 - fetch`,
-      message: err.message || '未知错误',
-      env: `fetch API error, name=${err.name}, stack前50字符=${err.stack?.substring(0, 50)}`
+      type: `任务API错误 - CapacitorHttp`,
+      message: err.message || JSON.stringify(err),
+      env: `CapacitorHttp plugin, error=${JSON.stringify(err)}`
     }
     return { taskCount: 0, tasks: [] }
   }
@@ -743,57 +733,29 @@ const testApiConnectivity = async () => {
   const testInternalApi = async () => {
     try {
       const baseUrl = isDevelopment ? '' : 'http://10.10.30.249:32547'
-      const params = new URLSearchParams({
-        pageNum: 1,
-        pageSize: 1,
-        realName: testName
-      })
-      const url = `${baseUrl}/zt/task/report/pageIndividualTaskReport?${params.toString()}`
+      const url = `${baseUrl}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=1&realName=${encodeURIComponent(testName)}`
       
-      // 使用 fetch API 替代 axios
-      const response = await fetch(url, {
-        method: 'GET',
+      // 使用 Capacitor 原生 HTTP 插件
+      const response = await CapacitorHttp.get({
+        url: url,
         headers: {
           'Accept': 'application/json'
-        },
-        mode: 'cors',
-        cache: 'no-cache'
+        }
       })
       
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
-      
-      const result = await response.json()
+      const result = response.data
       apiStatus.value.internal = result.code === 0
       
     } catch (err) {
       apiStatus.value.internal = false
       
-      // 增强错误信息
-      let errorType = '内网API - 未知错误'
-      let errorMessage = err.message || '未知错误'
-      let additionalInfo = ''
-      
-      if (err.name === 'TypeError') {
-        errorType = '内网API - 网络错误(TypeError)'
-        errorMessage = 'fetch 请求失败,可能是网络不可达或被 CORS 策略阻止'
-        additionalInfo = `原始错误: ${err.message}`
-      } else if (err.name === 'AbortError') {
-        errorType = '内网API - 请求中断'
-        errorMessage = '请求被中断或超时'
-      } else if (err.message.includes('HTTP')) {
-        errorType = '内网API - HTTP错误'
-        additionalInfo = err.message
-      }
-      
       // 显示详细错误弹窗
       errorDialog.value = {
         show: true,
         url: 'http://10.10.30.249:32547/zt/task/report/pageIndividualTaskReport',
-        type: errorType,
-        message: `${errorMessage}\n${additionalInfo}`,
-        env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}, MODE=${import.meta.env.MODE}, fetch API, error.name=${err.name}`
+        type: '内网API - CapacitorHttp错误',
+        message: err.message || JSON.stringify(err),
+        env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}, MODE=${import.meta.env.MODE}, CapacitorHttp plugin`
       }
     }
   }
