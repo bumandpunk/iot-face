@@ -48,6 +48,7 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     
     <!-- TV 支持 -->
     <uses-feature android:name="android.software.leanback" android:required="false" />
