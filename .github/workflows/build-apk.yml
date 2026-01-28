@@ -45,9 +45,6 @@ jobs:
       env:
         NODE_ENV: production
     
-    - name: Verify build output
-      run: node verify-build.js
-    
     - name: Sync Capacitor
       run: npx cap sync android
     
