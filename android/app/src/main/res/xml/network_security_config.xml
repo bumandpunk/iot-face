@@ -10,11 +10,13 @@
         </trust-anchors>
     </base-config>
     
-    <!-- 针对特定域名的配置 -->
+    <!-- 针对特定域名的配置 - 明确允许所有端口 -->
     <domain-config cleartextTrafficPermitted="true">
-        <!-- 内网 HTTP 地址 -->
+        <!-- 内网 HTTP 地址 - 包括所有端口 -->
         <domain includeSubdomains="true">10.10.30.249</domain>
         <domain includeSubdomains="true">10.10.50.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
         <trust-anchors>
             <certificates src="system" />
             <certificates src="user" />
