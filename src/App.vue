@@ -136,7 +136,7 @@
           </div>
           
           <!-- 任务列表 -->
-          <div class="popup-task-list" v-if="popupData.tasks && popupData.tasks.length">
+          <div class="popup-task-list" v-if="!isLoadingTasks && popupData.tasks && popupData.tasks.length > 0">
             <div class="popup-task-header">
               <div class="popup-task-col col-rank">排序</div>
               <div class="popup-task-col col-project">项目名称</div>
@@ -155,8 +155,22 @@
             </div>
           </div>
           
+          <!-- 加载中状态 -->
+          <div class="popup-loading" v-else-if="isLoadingTasks">
+            <div class="loading-spinner">⏳</div>
+            <div class="loading-text">正在获取任务列表...</div>
+          </div>
+          
+          <!-- 调试信息（用于APK调试，确认问题后可删除） -->
+          <div style="color: #ff6b6b; font-size: 10px; margin-top: 10px; padding: 5px; background: rgba(0,0,0,0.3); border-radius: 3px;">
+            🔍 调试: tasks数量={{ popupData.tasks?.length || 0 }}, 
+            taskCount={{ popupData.taskCount }},
+            tasks存在={{ !!popupData.tasks }},
+            加载中={{ isLoadingTasks }}
+          </div>
+          
           <!-- 无任务提示 -->
-          <div class="popup-no-task" v-else>
+          <div class="popup-no-task" v-else-if="!isLoadingTasks">
             <div class="no-task-icon">📋</div>
             <div class="no-task-title">你今天还没任务哦！</div>
             <div class="no-task-subtitle">赶紧去找老大安排一下吧！</div>
@@ -179,10 +193,10 @@ const INITIAL_RECONNECT_DELAY = 5000 // 初始重连延迟(ms)
 const MAX_RECONNECT_DELAY = 60000 // 最大重连延迟(ms)
 const HEARTBEAT_TIMEOUT = 9000 // 心跳超时时间(ms) - 8秒（5秒心跳 × 1.6）
 
-// 开发环境日志控制（生产环境禁用日志以提升性能）
+// 开发环境日志控制（生产环境也启用日志以便调试 APK）
 const isDev = import.meta.env.MODE === 'development'
-const log = isDev ? console.log.bind(console) : () => {}
-const warn = isDev ? console.warn.bind(console) : () => {}
+const log = console.log.bind(console) // 生产环境也启用
+const warn = console.warn.bind(console) // 生产环境也启用
 const error = console.error.bind(console) // 错误日志始终保留
 
 // 定时器引用（用于清理）
@@ -239,6 +253,7 @@ const flowData = ref({
 
 // 弹窗数据
 const showPopup = ref(false)
+const isLoadingTasks = ref(false) // 添加加载状态
 const popupData = ref({
   type: 'enter',
   avatar: '',
@@ -517,8 +532,19 @@ const showPersonPopup = async (popup) => {
   // 格式化时间
   const formattedTime = formatDateTime(popup.time)
   
+  // 标记正在加载任务
+  isLoadingTasks.value = true
+  
   // 获取任务列表（调用真实接口）
   const taskResult = await fetchPersonTasks(popup.name)
+  
+  // 标记加载完成
+  isLoadingTasks.value = false
+  
+  log('👤 fetchPersonTasks 返回结果:', taskResult)
+  log('👤 taskCount:', taskResult.taskCount)
+  log('👤 tasks数组:', taskResult.tasks)
+  log('👤 tasks长度:', taskResult.tasks?.length)
   
   popupData.value = {
     type: actionType,
@@ -531,6 +557,10 @@ const showPersonPopup = async (popup) => {
     tasks: taskResult.tasks,
     personType: popup.personType || 0
   }
+  
+  log('👤 设置后的 popupData.value:', JSON.stringify(popupData.value))
+  log('👤 popupData.value.tasks:', popupData.value.tasks)
+  log('👤 popupData.value.tasks.length:', popupData.value.tasks?.length)
   
   showPopup.value = true
   
@@ -574,19 +604,35 @@ const fetchPersonTasks = async (realName) => {
     }
     
     const { data } = result
+    log('📋 接口返回的data对象:', JSON.stringify(data))
+    
     if (!data) {
       warn('⚠️ 任务数据为空:', data)
       return { taskCount: 0, tasks: [] }
     }
 
-    // taskInfoVos 可能为 null 或 undefined 或空数组
-    if (!Array.isArray(data.taskInfoVos) || data.taskInfoVos.length === 0) {
-      log('📋 该人员暂无任务')
+    // 详细检查 taskInfoVos
+    log('📋 taskInfoVos类型:', typeof data.taskInfoVos)
+    log('📋 taskInfoVos是否为数组:', Array.isArray(data.taskInfoVos))
+    log('📋 taskInfoVos长度:', data.taskInfoVos?.length)
+    log('📋 taskInfoVos内容:', JSON.stringify(data.taskInfoVos))
+    
+    // taskInfoVos 可能为 null 或 undefined
+    if (!data.taskInfoVos) {
+      log('📋 该人员暂无任务（taskInfoVos为null/undefined）')
+      return { taskCount: data.taskCount || 0, tasks: [] }
+    }
+    
+    // 如果不是数组，尝试转换
+    let taskList = Array.isArray(data.taskInfoVos) ? data.taskInfoVos : [];
+    
+    if (taskList.length === 0) {
+      log('📋 该人员暂无任务（taskInfoVos为空数组）')
       return { taskCount: data.taskCount || 0, tasks: [] }
     }
     
     // 转换数据格式适配前端展示
-    const tasks = data.taskInfoVos.map(task => ({
+    const tasks = taskList.map(task => ({
       id: task.id,
       projectName: getProjectNameFromTaskName(task.name),
       taskName: task.name,
@@ -1504,6 +1550,34 @@ border-color: rgba(105, 81, 37, 1);
   border: 1px solid rgba(209, 166, 102, 0.2);
   border-radius: 6px;
   margin-top: 5px;
+}
+
+/* 加载中状态 */
+.popup-loading {
+  width: 100%;
+  padding: 25px 15px;
+  text-align: center;
+  background: rgba(105, 81, 37, 0.1);
+  border: 1px solid rgba(209, 166, 102, 0.2);
+  border-radius: 6px;
+  margin-top: 5px;
+}
+
+.loading-spinner {
+  font-size: 32px;
+  margin-bottom: 10px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 14px;
+  color: rgba(209, 166, 102, 0.9);
+  font-weight: 500;
 }
 
 .no-task-icon {
