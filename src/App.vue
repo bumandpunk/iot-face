@@ -199,7 +199,6 @@
 </template>
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { CapacitorHttp } from '@capacitor/core'
 import FlowChart from './components/FlowChart.vue'
 
 // 常量配置
@@ -597,70 +596,91 @@ const showPersonPopup = async (popup) => {
   }, POPUP_AUTO_CLOSE_TIME)
 }
 
-// 获取人员任务列表
+// 获取人员任务列表 - 使用原始 XMLHttpRequest (最可靠)
 const fetchPersonTasks = async (realName) => {
-  try {
-    if (!realName) {
-      return { taskCount: 0, tasks: [] }
-    }
-
-    const isDevelopment = import.meta.env.MODE === 'development'
-    const taskApiBase = isDevelopment ? '' : (import.meta.env.VITE_TASK_API_URL || 'http://10.10.30.249:32547')
-    
-    // 构建完整 URL
-    const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=5&realName=${encodeURIComponent(realName)}`
-    
-    // 使用 Capacitor 原生 HTTP 插件（绕过 WebView 限制）
-    const response = await CapacitorHttp.get({
-      url: apiUrl,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json;charset=UTF-8'
+  return new Promise((resolve) => {
+    try {
+      if (!realName) {
+        resolve({ taskCount: 0, tasks: [] })
+        return
       }
-    })
-    
-    const result = response.data
-    
-    if (result.code !== 0) {
-      return { taskCount: 0, tasks: [] }
+
+      const isDevelopment = import.meta.env.MODE === 'development'
+      const taskApiBase = isDevelopment ? '' : (import.meta.env.VITE_TASK_API_URL || 'http://10.10.30.249:32547')
+      
+      const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=5&realName=${encodeURIComponent(realName)}`
+      
+      const xhr = new XMLHttpRequest()
+      xhr.timeout = 15000
+      
+      xhr.onload = function() {
+        try {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const result = JSON.parse(xhr.responseText)
+            
+            if (result.code !== 0) {
+              resolve({ taskCount: 0, tasks: [] })
+              return
+            }
+            
+            const { data } = result
+            
+            if (!data || !data.taskInfoVos) {
+              resolve({ taskCount: data?.taskCount || 0, tasks: [] })
+              return
+            }
+            
+            let taskList = Array.isArray(data.taskInfoVos) ? data.taskInfoVos : []
+            
+            if (taskList.length === 0) {
+              resolve({ taskCount: data.taskCount || 0, tasks: [] })
+              return
+            }
+            
+            const tasks = taskList.map(task => ({
+              id: task.id,
+              projectName: getProjectNameFromTaskName(task.name),
+              taskName: task.name,
+              duration: task.estimate ? `${task.estimate}小时` : '-',
+              deadline: task.deadline ? formatDateDeadline(task.deadline) : '-',
+              status: task.status
+            }))
+            
+            resolve({
+              taskCount: data.taskCount || 0,
+              tasks: tasks
+            })
+          } else {
+            resolve({ taskCount: 0, tasks: [] })
+          }
+        } catch (err) {
+          resolve({ taskCount: 0, tasks: [] })
+        }
+      }
+      
+      xhr.onerror = function() {
+        errorDialog.value = {
+          show: true,
+          url: apiUrl,
+          type: '任务API - 网络错误',
+          message: `readyState=${xhr.readyState}, status=${xhr.status}, statusText=${xhr.statusText}`,
+          env: `XHR error, URL=${apiUrl}`
+        }
+        resolve({ taskCount: 0, tasks: [] })
+      }
+      
+      xhr.ontimeout = function() {
+        resolve({ taskCount: 0, tasks: [] })
+      }
+      
+      xhr.open('GET', apiUrl, true)
+      xhr.setRequestHeader('Accept', 'application/json')
+      xhr.send()
+      
+    } catch (err) {
+      resolve({ taskCount: 0, tasks: [] })
     }
-    
-    const { data } = result
-    
-    if (!data || !data.taskInfoVos) {
-      return { taskCount: data?.taskCount || 0, tasks: [] }
-    }
-    
-    let taskList = Array.isArray(data.taskInfoVos) ? data.taskInfoVos : []
-    
-    if (taskList.length === 0) {
-      return { taskCount: data.taskCount || 0, tasks: [] }
-    }
-    
-    const tasks = taskList.map(task => ({
-      id: task.id,
-      projectName: getProjectNameFromTaskName(task.name),
-      taskName: task.name,
-      duration: task.estimate ? `${task.estimate}小时` : '-',
-      deadline: task.deadline ? formatDateDeadline(task.deadline) : '-',
-      status: task.status
-    }))
-    
-    return {
-      taskCount: data.taskCount || 0,
-      tasks: tasks
-    }
-  } catch (err) {
-    // 在弹窗中显示任务API错误
-    errorDialog.value = {
-      show: true,
-      url: err.url || '任务API',
-      type: `任务API错误 - CapacitorHttp`,
-      message: err.message || JSON.stringify(err),
-      env: `CapacitorHttp plugin, error=${JSON.stringify(err)}`
-    }
-    return { taskCount: 0, tasks: [] }
-  }
+  })
 }
 
 // 从任务名称中提取项目名称
@@ -724,43 +744,58 @@ const handleVisibilityChange = () => {
 // 阻止右键菜单（电视环境）
 const preventContextMenu = (e) => e.preventDefault()
 
-// 测试API连通性(真实调用接口)
+// 测试API连通性(真实调用接口) - 使用 XMLHttpRequest
 const testApiConnectivity = async () => {
   const testName = '张富杰'
   const isDevelopment = import.meta.env.MODE === 'development'
   
   // 测试内网API
-  const testInternalApi = async () => {
-    try {
+  const testInternalApi = () => {
+    return new Promise((resolve) => {
       const baseUrl = isDevelopment ? '' : 'http://10.10.30.249:32547'
       const url = `${baseUrl}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=1&realName=${encodeURIComponent(testName)}`
+      const xhr = new XMLHttpRequest()
       
-      // 使用 Capacitor 原生 HTTP 插件
-      const response = await CapacitorHttp.get({
-        url: url,
-        headers: {
-          'Accept': 'application/json'
+      xhr.timeout = 8000
+      
+      xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const result = JSON.parse(xhr.responseText)
+            apiStatus.value.internal = result.code === 0
+          } catch (err) {
+            apiStatus.value.internal = false
+          }
+        } else {
+          apiStatus.value.internal = false
         }
-      })
-      
-      const result = response.data
-      apiStatus.value.internal = result.code === 0
-      
-    } catch (err) {
-      apiStatus.value.internal = false
-      
-      // 显示详细错误弹窗
-      errorDialog.value = {
-        show: true,
-        url: 'http://10.10.30.249:32547/zt/task/report/pageIndividualTaskReport',
-        type: '内网API - CapacitorHttp错误',
-        message: err.message || JSON.stringify(err),
-        env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}, MODE=${import.meta.env.MODE}, CapacitorHttp plugin`
+        resolve()
       }
-    }
+      
+      xhr.onerror = () => {
+        apiStatus.value.internal = false
+        errorDialog.value = {
+          show: true,
+          url: url,
+          type: '内网API - XMLHttpRequest错误',
+          message: `readyState=${xhr.readyState}, status=${xhr.status}, responseText=${xhr.responseText.substring(0, 100)}`,
+          env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}, MODE=${import.meta.env.MODE}`
+        }
+        resolve()
+      }
+      
+      xhr.ontimeout = () => {
+        apiStatus.value.internal = false
+        resolve()
+      }
+      
+      xhr.open('GET', url, true)
+      xhr.setRequestHeader('Accept', 'application/json')
+      xhr.send()
+    })
   }
   
-  // 并行测试(暂时只测试内网)
+  // 测试内网
   await testInternalApi()
 }
 
