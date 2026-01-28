@@ -161,19 +161,19 @@
             <div class="loading-text">正在获取任务列表...</div>
           </div>
           
+          <!-- 无任务提示 -->
+          <div class="popup-no-task" v-else>
+            <div class="no-task-icon">📋</div>
+            <div class="no-task-title">你今天还没任务哦！</div>
+            <div class="no-task-subtitle">赶紧去找老大安排一下吧！</div>
+          </div>
+          
           <!-- 调试信息（用于APK调试，确认问题后可删除） -->
           <div style="color: #ff6b6b; font-size: 10px; margin-top: 10px; padding: 5px; background: rgba(0,0,0,0.3); border-radius: 3px;">
             🔍 调试: tasks数量={{ popupData.tasks?.length || 0 }}, 
             taskCount={{ popupData.taskCount }},
             tasks存在={{ !!popupData.tasks }},
             加载中={{ isLoadingTasks }}
-          </div>
-          
-          <!-- 无任务提示 -->
-          <div class="popup-no-task" v-else-if="!isLoadingTasks">
-            <div class="no-task-icon">📋</div>
-            <div class="no-task-title">你今天还没任务哦！</div>
-            <div class="no-task-subtitle">赶紧去找老大安排一下吧！</div>
           </div>
         </div>
       </div>
