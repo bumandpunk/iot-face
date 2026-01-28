@@ -167,14 +167,6 @@
             <div class="no-task-title">你今天还没任务哦！</div>
             <div class="no-task-subtitle">赶紧去找老大安排一下吧！</div>
           </div>
-          
-          <!-- 调试信息（用于APK调试，确认问题后可删除） -->
-          <div style="color: #ff6b6b; font-size: 10px; margin-top: 10px; padding: 5px; background: rgba(0,0,0,0.3); border-radius: 3px;">
-            🔍 调试: tasks数量={{ popupData.tasks?.length || 0 }}, 
-            taskCount={{ popupData.taskCount }},
-            tasks存在={{ !!popupData.tasks }},
-            加载中={{ isLoadingTasks }}
-          </div>
         </div>
       </div>
     </transition>
@@ -571,84 +563,47 @@ const showPersonPopup = async (popup) => {
   }, POPUP_AUTO_CLOSE_TIME)
 }
 
-// 获取人员任务列表 - 使用 XMLHttpRequest 替代 fetch，兼容性更好
+// 获取人员任务列表
 const fetchPersonTasks = async (realName) => {
   return new Promise((resolve) => {
     try {
       if (!realName) {
-        warn('⚠️ 缺少姓名参数，无法获取任务列表')
         resolve({ taskCount: 0, tasks: [] })
         return
       }
 
-      // 生产环境：直接使用完整URL
-      // 开发环境：使用代理路径（空字符串），由Vite代理到 /zt -> https://tp.cewaycloud.com
       const isDevelopment = import.meta.env.MODE === 'development'
-      const taskApiBase = isDevelopment ? '' : (import.meta.env.VITE_TASK_API_URL || 'https://tp.cewaycloud.com')
+      const taskApiBase = isDevelopment ? '' : (import.meta.env.VITE_TASK_API_URL || 'http://10.10.30.249:32547')
       
       const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=5&realName=${encodeURIComponent(realName)}`
       
-      log('📋 ===== 任务接口请求开始 (XMLHttpRequest) =====')
-      log('📋 当前环境模式:', import.meta.env.MODE)
-      log('📋 是否开发环境:', isDevelopment)
-      log('📋 VITE_TASK_API_URL 原始值:', import.meta.env.VITE_TASK_API_URL)
-      log('📋 taskApiBase 最终值:', taskApiBase)
-      log('📋 完整请求URL:', apiUrl)
-      log('📋 请求的姓名参数:', realName)
-      
       const xhr = new XMLHttpRequest()
+      xhr.timeout = 10000
       
-      // 设置超时时间
-      xhr.timeout = 10000 // 10秒
-      
-      // 监听加载完成
       xhr.onload = function() {
         try {
-          log('📋 任务接口响应成功')
-          log('📋 响应状态:', xhr.status, xhr.statusText)
-          log('📋 响应头 Content-Type:', xhr.getResponseHeader('Content-Type'))
-          log('📋 响应数据长度:', xhr.responseText?.length || 0)
-          
           if (xhr.status >= 200 && xhr.status < 300) {
             const result = JSON.parse(xhr.responseText)
-            log('📋 任务接口返回:', result)
             
             if (result.code !== 0) {
-              throw new Error(result.msg || '接口返回错误')
-            }
-            
-            const { data } = result
-            log('📋 接口返回的data对象:', JSON.stringify(data))
-            
-            if (!data) {
-              warn('⚠️ 任务数据为空:', data)
               resolve({ taskCount: 0, tasks: [] })
               return
             }
-
-            // 详细检查 taskInfoVos
-            log('📋 taskInfoVos类型:', typeof data.taskInfoVos)
-            log('📋 taskInfoVos是否为数组:', Array.isArray(data.taskInfoVos))
-            log('📋 taskInfoVos长度:', data.taskInfoVos?.length)
-            log('📋 taskInfoVos内容:', JSON.stringify(data.taskInfoVos))
             
-            // taskInfoVos 可能为 null 或 undefined
-            if (!data.taskInfoVos) {
-              log('📋 该人员暂无任务（taskInfoVos为null/undefined）')
-              resolve({ taskCount: data.taskCount || 0, tasks: [] })
+            const { data } = result
+            
+            if (!data || !data.taskInfoVos) {
+              resolve({ taskCount: data?.taskCount || 0, tasks: [] })
               return
             }
             
-            // 如果不是数组，尝试转换
-            let taskList = Array.isArray(data.taskInfoVos) ? data.taskInfoVos : [];
+            let taskList = Array.isArray(data.taskInfoVos) ? data.taskInfoVos : []
             
             if (taskList.length === 0) {
-              log('📋 该人员暂无任务（taskInfoVos为空数组）')
               resolve({ taskCount: data.taskCount || 0, tasks: [] })
               return
             }
             
-            // 转换数据格式适配前端展示
             const tasks = taskList.map(task => ({
               id: task.id,
               projectName: getProjectNameFromTaskName(task.name),
@@ -658,67 +613,36 @@ const fetchPersonTasks = async (realName) => {
               status: task.status
             }))
             
-            log('✅ 转换后的任务数据:', tasks)
-            
-            // 返回接口的taskCount和转换后的任务列表
             resolve({
               taskCount: data.taskCount || 0,
               tasks: tasks
             })
           } else {
-            throw new Error(`HTTP ${xhr.status}: ${xhr.statusText}`)
+            resolve({ taskCount: 0, tasks: [] })
           }
         } catch (err) {
-          error('❌ 解析响应数据失败:', err.message)
           resolve({ taskCount: 0, tasks: [] })
         }
       }
       
-      // 监听错误
       xhr.onerror = function() {
-        error('❌ ===== XMLHttpRequest 网络错误 =====')
-        error('❌ 请求状态:', xhr.status)
-        error('❌ 请求的URL:', apiUrl)
-        error('❌ 可能原因:')
-        error('   1. 网络连接问题（电视未联网或网络不稳定）')
-        error('   2. HTTPS 证书问题（证书不被信任或自签名）')
-        error('   3. 服务器地址无法访问')
-        error('   4. CORS 跨域限制')
-        error('   💡 建议: 使用 Chrome 远程调试查看详细错误信息')
-        error('❌ =============================')
         resolve({ taskCount: 0, tasks: [] })
       }
       
-      // 监听超时
       xhr.ontimeout = function() {
-        error('❌ ===== XMLHttpRequest 请求超时 =====')
-        error('❌ 超时时间: 10秒')
-        error('❌ 请求的URL:', apiUrl)
-        error('   💡 建议: 检查网络速度或服务器响应时间')
-        error('❌ =============================')
         resolve({ taskCount: 0, tasks: [] })
       }
       
-      // 监听中止
       xhr.onabort = function() {
-        error('❌ XMLHttpRequest 请求被中止')
         resolve({ taskCount: 0, tasks: [] })
       }
       
-      // 发送请求
       xhr.open('GET', apiUrl, true)
       xhr.setRequestHeader('Accept', 'application/json')
       xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8')
-      
-      log('📋 XMLHttpRequest 配置完成，开始发送请求...')
       xhr.send()
       
     } catch (err) {
-      error('❌ ===== 创建请求失败 =====')
-      error('❌ 错误类型:', err.name)
-      error('❌ 错误消息:', err.message)
-      error('❌ 错误堆栈:', err.stack)
-      error('❌ =============================')
       resolve({ taskCount: 0, tasks: [] })
     }
   })
@@ -787,20 +711,6 @@ const preventContextMenu = (e) => e.preventDefault()
 
 // 生命周期
 onMounted(() => {
-  // 输出环境信息（用于调试）
-  console.log('========================================')
-  console.log('🚀 应用启动 - 环境信息')
-  console.log('========================================')
-  console.log('📋 MODE:', import.meta.env.MODE)
-  console.log('📋 DEV:', import.meta.env.DEV)
-  console.log('📋 PROD:', import.meta.env.PROD)
-  console.log('📋 BASE_URL:', import.meta.env.BASE_URL)
-  console.log('📋 VITE_BUILD_ENV:', import.meta.env.VITE_BUILD_ENV)
-  console.log('📋 VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL)
-  console.log('📋 VITE_SSE_URL:', import.meta.env.VITE_SSE_URL)
-  console.log('📋 VITE_TASK_API_URL:', import.meta.env.VITE_TASK_API_URL)
-  console.log('========================================')
-  
   // 启动时间更新定时器
   updateTime()
   timeUpdateTimer = setInterval(updateTime, 1000)

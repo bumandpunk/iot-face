@@ -10,26 +10,14 @@
         </trust-anchors>
     </base-config>
     
-    <!-- 针对特定域名的配置 - 包括 HTTPS 域名 -->
+    <!-- 针对特定域名的配置 -->
     <domain-config cleartextTrafficPermitted="true">
         <!-- 内网 HTTP 地址 -->
         <domain includeSubdomains="true">10.10.30.249</domain>
         <domain includeSubdomains="true">10.10.50.2</domain>
-        <!-- 外网 HTTPS 地址 -->
-        <domain includeSubdomains="true">tp.cewaycloud.com</domain>
-        <domain includeSubdomains="true">cewaycloud.com</domain>
         <trust-anchors>
             <certificates src="system" />
             <certificates src="user" />
         </trust-anchors>
     </domain-config>
-    
-    <!-- 调试配置：如果证书问题，可以临时启用此配置 -->
-    <!-- 注意：生产环境中应该移除此配置！ -->
-    <debug-overrides>
-        <trust-anchors>
-            <certificates src="system" />
-            <certificates src="user" />
-        </trust-anchors>
-    </debug-overrides>
 </network-security-config>
