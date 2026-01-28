@@ -31,8 +31,22 @@ jobs:
     - name: Install dependencies
       run: npm install
     
+    - name: Check environment files
+      run: |
+        echo "=== 检查环境文件 ==="
+        ls -la .env* || echo "没有找到 .env 文件"
+        if [ -f .env.production ]; then
+          echo "=== .env.production 内容 ==="
+          cat .env.production
+        fi
+    
     - name: Build Vue project
-      run: npm run build
+      run: npm run build:prod
+      env:
+        NODE_ENV: production
+    
+    - name: Verify build output
+      run: node verify-build.js
     
     - name: Sync Capacitor
       run: npx cap sync android

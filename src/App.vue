@@ -579,15 +579,20 @@ const fetchPersonTasks = async (realName) => {
       return { taskCount: 0, tasks: [] }
     }
 
-    // 开发环境使用代理，生产环境使用完整URL
-    const taskApiBase = import.meta.env.MODE === 'development' 
-      ? '' 
-      : (import.meta.env.VITE_TASK_API_URL || 'https://tp.cewaycloud.com')
+    // 生产环境：直接使用完整URL
+    // 开发环境：使用代理路径（空字符串），由Vite代理到 /zt -> https://tp.cewaycloud.com
+    const isDevelopment = import.meta.env.MODE === 'development'
+    const taskApiBase = isDevelopment ? '' : (import.meta.env.VITE_TASK_API_URL || 'https://tp.cewaycloud.com')
     
     const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=5&realName=${encodeURIComponent(realName)}`
-    log('📋 获取任务列表:', apiUrl)
+    
+    log('📋 ===== 任务接口请求开始 =====')
     log('📋 当前环境模式:', import.meta.env.MODE)
-    log('📋 VITE_TASK_API_URL:', import.meta.env.VITE_TASK_API_URL)
+    log('📋 是否开发环境:', isDevelopment)
+    log('📋 VITE_TASK_API_URL 原始值:', import.meta.env.VITE_TASK_API_URL)
+    log('📋 taskApiBase 最终值:', taskApiBase)
+    log('📋 完整请求URL:', apiUrl)
+    log('📋 请求的姓名参数:', realName)
     
     const response = await fetch(apiUrl)
     log('📋 任务接口响应状态:', response.status, response.statusText)
@@ -720,6 +725,20 @@ const preventContextMenu = (e) => e.preventDefault()
 
 // 生命周期
 onMounted(() => {
+  // 输出环境信息（用于调试）
+  console.log('========================================')
+  console.log('🚀 应用启动 - 环境信息')
+  console.log('========================================')
+  console.log('📋 MODE:', import.meta.env.MODE)
+  console.log('📋 DEV:', import.meta.env.DEV)
+  console.log('📋 PROD:', import.meta.env.PROD)
+  console.log('📋 BASE_URL:', import.meta.env.BASE_URL)
+  console.log('📋 VITE_BUILD_ENV:', import.meta.env.VITE_BUILD_ENV)
+  console.log('📋 VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL)
+  console.log('📋 VITE_SSE_URL:', import.meta.env.VITE_SSE_URL)
+  console.log('📋 VITE_TASK_API_URL:', import.meta.env.VITE_TASK_API_URL)
+  console.log('========================================')
+  
   // 启动时间更新定时器
   updateTime()
   timeUpdateTimer = setInterval(updateTime, 1000)
