@@ -720,11 +720,13 @@ const preventContextMenu = (e) => e.preventDefault()
 const testApiConnectivity = async () => {
   const testName = '张富杰'
   const encodedName = encodeURIComponent(testName)
+  const isDevelopment = import.meta.env.MODE === 'development'
   
   // 测试内网API
   const testInternalApi = () => {
     return new Promise((resolve) => {
-      const url = `http://10.10.30.249:32547/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=1&realName=${encodedName}`
+      const baseUrl = isDevelopment ? '' : 'http://10.10.30.249:32547'
+      const url = `${baseUrl}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=1&realName=${encodedName}`
       const xhr = new XMLHttpRequest()
       
       xhr.timeout = 5000
@@ -733,33 +735,23 @@ const testApiConnectivity = async () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
             const result = JSON.parse(xhr.responseText)
-            if (result.code === 0) {
-              apiStatus.value.internal = true
-              console.log('✓ 内网API调用成功')
-            } else {
-              apiStatus.value.internal = false
-              console.log('✗ 内网API返回错误:', result.msg)
-            }
+            apiStatus.value.internal = result.code === 0
           } catch (err) {
             apiStatus.value.internal = false
-            console.log('✗ 内网API响应解析失败:', err.message)
           }
         } else {
           apiStatus.value.internal = false
-          console.log('✗ 内网API HTTP错误:', xhr.status)
         }
         resolve()
       }
       
-      xhr.onerror = function() {
+      xhr.onerror = () => {
         apiStatus.value.internal = false
-        console.log('✗ 内网API网络错误')
         resolve()
       }
       
-      xhr.ontimeout = function() {
+      xhr.ontimeout = () => {
         apiStatus.value.internal = false
-        console.log('✗ 内网API请求超时')
         resolve()
       }
       
@@ -772,7 +764,8 @@ const testApiConnectivity = async () => {
   // 测试外网API
   const testExternalApi = () => {
     return new Promise((resolve) => {
-      const url = `https://tp.cewaycloud.com/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=1&realName=${encodedName}`
+      const baseUrl = isDevelopment ? '' : 'https://tp.cewaycloud.com'
+      const url = `${baseUrl}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=1&realName=${encodedName}`
       const xhr = new XMLHttpRequest()
       
       xhr.timeout = 5000
@@ -781,33 +774,23 @@ const testApiConnectivity = async () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
             const result = JSON.parse(xhr.responseText)
-            if (result.code === 0) {
-              apiStatus.value.external = true
-              console.log('✓ 外网API调用成功')
-            } else {
-              apiStatus.value.external = false
-              console.log('✗ 外网API返回错误:', result.msg)
-            }
+            apiStatus.value.external = result.code === 0
           } catch (err) {
             apiStatus.value.external = false
-            console.log('✗ 外网API响应解析失败:', err.message)
           }
         } else {
           apiStatus.value.external = false
-          console.log('✗ 外网API HTTP错误:', xhr.status)
         }
         resolve()
       }
       
-      xhr.onerror = function() {
+      xhr.onerror = () => {
         apiStatus.value.external = false
-        console.log('✗ 外网API网络错误')
         resolve()
       }
       
-      xhr.ontimeout = function() {
+      xhr.ontimeout = () => {
         apiStatus.value.external = false
-        console.log('✗ 外网API请求超时')
         resolve()
       }
       
@@ -822,12 +805,6 @@ const testApiConnectivity = async () => {
     testInternalApi(),
     testExternalApi()
   ])
-  
-  console.log('========================================')
-  console.log('API连通性测试完成')
-  console.log('内网API (http://10.10.30.249:32547):', apiStatus.value.internal ? '✓ 成功' : '✗ 失败')
-  console.log('外网API (https://tp.cewaycloud.com):', apiStatus.value.external ? '✓ 成功' : '✗ 失败')
-  console.log('========================================')
 }
 
 // 生命周期
@@ -835,6 +812,11 @@ onMounted(() => {
   // 启动时间更新定时器
   updateTime()
   timeUpdateTimer = setInterval(updateTime, 1000)
+  
+  // 验证环境变量（重要！）
+  if (!import.meta.env.VITE_TASK_API_URL) {
+    console.error('⚠️ VITE_TASK_API_URL 未定义！使用默认值')
+  }
   
   // 测试API连通性
   testApiConnectivity()

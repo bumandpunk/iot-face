@@ -26,7 +26,7 @@ export default defineConfig({
         }
       },
       '/zt': {
-        target: 'https://tp.cewaycloud.com',
+        target: 'http://10.10.30.249:32547',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path
