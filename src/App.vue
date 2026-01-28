@@ -571,95 +571,157 @@ const showPersonPopup = async (popup) => {
   }, POPUP_AUTO_CLOSE_TIME)
 }
 
-// 获取人员任务列表
+// 获取人员任务列表 - 使用 XMLHttpRequest 替代 fetch，兼容性更好
 const fetchPersonTasks = async (realName) => {
-  try {
-    if (!realName) {
-      warn('⚠️ 缺少姓名参数，无法获取任务列表')
-      return { taskCount: 0, tasks: [] }
-    }
+  return new Promise((resolve) => {
+    try {
+      if (!realName) {
+        warn('⚠️ 缺少姓名参数，无法获取任务列表')
+        resolve({ taskCount: 0, tasks: [] })
+        return
+      }
 
-    // 生产环境：直接使用完整URL
-    // 开发环境：使用代理路径（空字符串），由Vite代理到 /zt -> https://tp.cewaycloud.com
-    const isDevelopment = import.meta.env.MODE === 'development'
-    const taskApiBase = isDevelopment ? '' : (import.meta.env.VITE_TASK_API_URL || 'https://tp.cewaycloud.com')
-    
-    const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=5&realName=${encodeURIComponent(realName)}`
-    
-    log('📋 ===== 任务接口请求开始 =====')
-    log('📋 当前环境模式:', import.meta.env.MODE)
-    log('📋 是否开发环境:', isDevelopment)
-    log('📋 VITE_TASK_API_URL 原始值:', import.meta.env.VITE_TASK_API_URL)
-    log('📋 taskApiBase 最终值:', taskApiBase)
-    log('📋 完整请求URL:', apiUrl)
-    log('📋 请求的姓名参数:', realName)
-    
-    const response = await fetch(apiUrl)
-    log('📋 任务接口响应状态:', response.status, response.statusText)
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-    }
-    
-    const result = await response.json()
-    log('📋 任务接口返回:', result)
-    
-    if (result.code !== 0) {
-      throw new Error(result.msg || '接口返回错误')
-    }
-    
-    const { data } = result
-    log('📋 接口返回的data对象:', JSON.stringify(data))
-    
-    if (!data) {
-      warn('⚠️ 任务数据为空:', data)
-      return { taskCount: 0, tasks: [] }
-    }
+      // 生产环境：直接使用完整URL
+      // 开发环境：使用代理路径（空字符串），由Vite代理到 /zt -> https://tp.cewaycloud.com
+      const isDevelopment = import.meta.env.MODE === 'development'
+      const taskApiBase = isDevelopment ? '' : (import.meta.env.VITE_TASK_API_URL || 'https://tp.cewaycloud.com')
+      
+      const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=5&realName=${encodeURIComponent(realName)}`
+      
+      log('📋 ===== 任务接口请求开始 (XMLHttpRequest) =====')
+      log('📋 当前环境模式:', import.meta.env.MODE)
+      log('📋 是否开发环境:', isDevelopment)
+      log('📋 VITE_TASK_API_URL 原始值:', import.meta.env.VITE_TASK_API_URL)
+      log('📋 taskApiBase 最终值:', taskApiBase)
+      log('📋 完整请求URL:', apiUrl)
+      log('📋 请求的姓名参数:', realName)
+      
+      const xhr = new XMLHttpRequest()
+      
+      // 设置超时时间
+      xhr.timeout = 10000 // 10秒
+      
+      // 监听加载完成
+      xhr.onload = function() {
+        try {
+          log('📋 任务接口响应成功')
+          log('📋 响应状态:', xhr.status, xhr.statusText)
+          log('📋 响应头 Content-Type:', xhr.getResponseHeader('Content-Type'))
+          log('📋 响应数据长度:', xhr.responseText?.length || 0)
+          
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const result = JSON.parse(xhr.responseText)
+            log('📋 任务接口返回:', result)
+            
+            if (result.code !== 0) {
+              throw new Error(result.msg || '接口返回错误')
+            }
+            
+            const { data } = result
+            log('📋 接口返回的data对象:', JSON.stringify(data))
+            
+            if (!data) {
+              warn('⚠️ 任务数据为空:', data)
+              resolve({ taskCount: 0, tasks: [] })
+              return
+            }
 
-    // 详细检查 taskInfoVos
-    log('📋 taskInfoVos类型:', typeof data.taskInfoVos)
-    log('📋 taskInfoVos是否为数组:', Array.isArray(data.taskInfoVos))
-    log('📋 taskInfoVos长度:', data.taskInfoVos?.length)
-    log('📋 taskInfoVos内容:', JSON.stringify(data.taskInfoVos))
-    
-    // taskInfoVos 可能为 null 或 undefined
-    if (!data.taskInfoVos) {
-      log('📋 该人员暂无任务（taskInfoVos为null/undefined）')
-      return { taskCount: data.taskCount || 0, tasks: [] }
+            // 详细检查 taskInfoVos
+            log('📋 taskInfoVos类型:', typeof data.taskInfoVos)
+            log('📋 taskInfoVos是否为数组:', Array.isArray(data.taskInfoVos))
+            log('📋 taskInfoVos长度:', data.taskInfoVos?.length)
+            log('📋 taskInfoVos内容:', JSON.stringify(data.taskInfoVos))
+            
+            // taskInfoVos 可能为 null 或 undefined
+            if (!data.taskInfoVos) {
+              log('📋 该人员暂无任务（taskInfoVos为null/undefined）')
+              resolve({ taskCount: data.taskCount || 0, tasks: [] })
+              return
+            }
+            
+            // 如果不是数组，尝试转换
+            let taskList = Array.isArray(data.taskInfoVos) ? data.taskInfoVos : [];
+            
+            if (taskList.length === 0) {
+              log('📋 该人员暂无任务（taskInfoVos为空数组）')
+              resolve({ taskCount: data.taskCount || 0, tasks: [] })
+              return
+            }
+            
+            // 转换数据格式适配前端展示
+            const tasks = taskList.map(task => ({
+              id: task.id,
+              projectName: getProjectNameFromTaskName(task.name),
+              taskName: task.name,
+              duration: task.estimate ? `${task.estimate}小时` : '-',
+              deadline: task.deadline ? formatDateDeadline(task.deadline) : '-',
+              status: task.status
+            }))
+            
+            log('✅ 转换后的任务数据:', tasks)
+            
+            // 返回接口的taskCount和转换后的任务列表
+            resolve({
+              taskCount: data.taskCount || 0,
+              tasks: tasks
+            })
+          } else {
+            throw new Error(`HTTP ${xhr.status}: ${xhr.statusText}`)
+          }
+        } catch (err) {
+          error('❌ 解析响应数据失败:', err.message)
+          resolve({ taskCount: 0, tasks: [] })
+        }
+      }
+      
+      // 监听错误
+      xhr.onerror = function() {
+        error('❌ ===== XMLHttpRequest 网络错误 =====')
+        error('❌ 请求状态:', xhr.status)
+        error('❌ 请求的URL:', apiUrl)
+        error('❌ 可能原因:')
+        error('   1. 网络连接问题（电视未联网或网络不稳定）')
+        error('   2. HTTPS 证书问题（证书不被信任或自签名）')
+        error('   3. 服务器地址无法访问')
+        error('   4. CORS 跨域限制')
+        error('   💡 建议: 使用 Chrome 远程调试查看详细错误信息')
+        error('❌ =============================')
+        resolve({ taskCount: 0, tasks: [] })
+      }
+      
+      // 监听超时
+      xhr.ontimeout = function() {
+        error('❌ ===== XMLHttpRequest 请求超时 =====')
+        error('❌ 超时时间: 10秒')
+        error('❌ 请求的URL:', apiUrl)
+        error('   💡 建议: 检查网络速度或服务器响应时间')
+        error('❌ =============================')
+        resolve({ taskCount: 0, tasks: [] })
+      }
+      
+      // 监听中止
+      xhr.onabort = function() {
+        error('❌ XMLHttpRequest 请求被中止')
+        resolve({ taskCount: 0, tasks: [] })
+      }
+      
+      // 发送请求
+      xhr.open('GET', apiUrl, true)
+      xhr.setRequestHeader('Accept', 'application/json')
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8')
+      
+      log('📋 XMLHttpRequest 配置完成，开始发送请求...')
+      xhr.send()
+      
+    } catch (err) {
+      error('❌ ===== 创建请求失败 =====')
+      error('❌ 错误类型:', err.name)
+      error('❌ 错误消息:', err.message)
+      error('❌ 错误堆栈:', err.stack)
+      error('❌ =============================')
+      resolve({ taskCount: 0, tasks: [] })
     }
-    
-    // 如果不是数组，尝试转换
-    let taskList = Array.isArray(data.taskInfoVos) ? data.taskInfoVos : [];
-    
-    if (taskList.length === 0) {
-      log('📋 该人员暂无任务（taskInfoVos为空数组）')
-      return { taskCount: data.taskCount || 0, tasks: [] }
-    }
-    
-    // 转换数据格式适配前端展示
-    const tasks = taskList.map(task => ({
-      id: task.id,
-      projectName: getProjectNameFromTaskName(task.name),
-      taskName: task.name,
-      duration: task.estimate ? `${task.estimate}小时` : '-',
-      deadline: task.deadline ? formatDateDeadline(task.deadline) : '-',
-      status: task.status
-    }))
-    
-    log('✅ 转换后的任务数据:', tasks)
-    
-    // 返回接口的taskCount和转换后的任务列表
-    return {
-      taskCount: data.taskCount || 0,
-      tasks: tasks
-    }
-    
-  } catch (err) {
-    error('❌ 获取任务列表失败:', err)
-    error('❌ 错误详情 - name:', err.name, 'message:', err.message)
-    error('❌ 请求的URL:', `${import.meta.env.VITE_TASK_API_URL || 'https://tp.cewaycloud.com'}/zt/task/report/pageIndividualTaskReport`)
-    return { taskCount: 0, tasks: [] }
-  }
+  })
 }
 
 // 从任务名称中提取项目名称
