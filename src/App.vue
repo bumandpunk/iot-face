@@ -24,11 +24,13 @@
       <div class="error-dialog-content">
         <div class="error-dialog-header">⚠️ API 调用错误</div>
         <div class="error-dialog-body">
+          <p><strong>错误类型:</strong> {{ errorDialog.type }}</p>
+          <p><strong>错误信息:</strong></p>
+          <p class="error-message">{{ errorDialog.message }}</p>
           <p><strong>请求URL:</strong></p>
           <p class="error-url">{{ errorDialog.url }}</p>
-          <p><strong>错误类型:</strong> {{ errorDialog.type }}</p>
-          <p><strong>错误信息:</strong> {{ errorDialog.message }}</p>
-          <p><strong>环境变量:</strong> {{ errorDialog.env }}</p>
+          <p><strong>环境信息:</strong></p>
+          <p class="error-env">{{ errorDialog.env }}</p>
         </div>
         <button class="error-dialog-close" @click="errorDialog.show = false">关闭</button>
       </div>
@@ -197,6 +199,7 @@
 </template>
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import axios from 'axios'
 import FlowChart from './components/FlowChart.vue'
 
 // 常量配置
@@ -596,87 +599,71 @@ const showPersonPopup = async (popup) => {
 
 // 获取人员任务列表
 const fetchPersonTasks = async (realName) => {
-  return new Promise((resolve) => {
-    try {
-      if (!realName) {
-        resolve({ taskCount: 0, tasks: [] })
-        return
-      }
-
-      const isDevelopment = import.meta.env.MODE === 'development'
-      const taskApiBase = isDevelopment ? '' : (import.meta.env.VITE_TASK_API_URL || 'http://10.10.30.249:32547')
-      
-      const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=5&realName=${encodeURIComponent(realName)}`
-      
-      const xhr = new XMLHttpRequest()
-      xhr.timeout = 10000
-      
-      xhr.onload = function() {
-        try {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            const result = JSON.parse(xhr.responseText)
-            
-            if (result.code !== 0) {
-              resolve({ taskCount: 0, tasks: [] })
-              return
-            }
-            
-            const { data } = result
-            
-            if (!data || !data.taskInfoVos) {
-              resolve({ taskCount: data?.taskCount || 0, tasks: [] })
-              return
-            }
-            
-            let taskList = Array.isArray(data.taskInfoVos) ? data.taskInfoVos : []
-            
-            if (taskList.length === 0) {
-              resolve({ taskCount: data.taskCount || 0, tasks: [] })
-              return
-            }
-            
-            const tasks = taskList.map(task => ({
-              id: task.id,
-              projectName: getProjectNameFromTaskName(task.name),
-              taskName: task.name,
-              duration: task.estimate ? `${task.estimate}小时` : '-',
-              deadline: task.deadline ? formatDateDeadline(task.deadline) : '-',
-              status: task.status
-            }))
-            
-            resolve({
-              taskCount: data.taskCount || 0,
-              tasks: tasks
-            })
-          } else {
-            resolve({ taskCount: 0, tasks: [] })
-          }
-        } catch (err) {
-          resolve({ taskCount: 0, tasks: [] })
-        }
-      }
-      
-      xhr.onerror = function() {
-        resolve({ taskCount: 0, tasks: [] })
-      }
-      
-      xhr.ontimeout = function() {
-        resolve({ taskCount: 0, tasks: [] })
-      }
-      
-      xhr.onabort = function() {
-        resolve({ taskCount: 0, tasks: [] })
-      }
-      
-      xhr.open('GET', apiUrl, true)
-      xhr.setRequestHeader('Accept', 'application/json')
-      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8')
-      xhr.send()
-      
-    } catch (err) {
-      resolve({ taskCount: 0, tasks: [] })
+  try {
+    if (!realName) {
+      return { taskCount: 0, tasks: [] }
     }
-  })
+
+    const isDevelopment = import.meta.env.MODE === 'development'
+    const taskApiBase = isDevelopment ? '' : (import.meta.env.VITE_TASK_API_URL || 'http://10.10.30.249:32547')
+    
+    const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport`
+    
+    const response = await axios.get(apiUrl, {
+      params: {
+        pageNum: 1,
+        pageSize: 5,
+        realName: realName
+      },
+      timeout: 10000,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json;charset=UTF-8'
+      }
+    })
+    
+    const result = response.data
+    
+    if (result.code !== 0) {
+      return { taskCount: 0, tasks: [] }
+    }
+    
+    const { data } = result
+    
+    if (!data || !data.taskInfoVos) {
+      return { taskCount: data?.taskCount || 0, tasks: [] }
+    }
+    
+    let taskList = Array.isArray(data.taskInfoVos) ? data.taskInfoVos : []
+    
+    if (taskList.length === 0) {
+      return { taskCount: data.taskCount || 0, tasks: [] }
+    }
+    
+    const tasks = taskList.map(task => ({
+      id: task.id,
+      projectName: getProjectNameFromTaskName(task.name),
+      taskName: task.name,
+      duration: task.estimate ? `${task.estimate}小时` : '-',
+      deadline: task.deadline ? formatDateDeadline(task.deadline) : '-',
+      status: task.status
+    }))
+    
+    return {
+      taskCount: data.taskCount || 0,
+      tasks: tasks
+    }
+  } catch (err) {
+    // 在弹窗中显示任务API错误
+    errorDialog.value = {
+      show: true,
+      url: err.config?.url || '任务API',
+      type: `任务API错误 - ${err.code || 'Unknown'}`,
+      message: err.message || '未知错误',
+      env: `axios.isAxiosError=${axios.isAxiosError(err)}, response=${!!err.response}, request=${!!err.request}`
+    }
+    return { taskCount: 0, tasks: [] }
+  }
 }
 
 // 从任务名称中提取项目名称
@@ -740,84 +727,78 @@ const handleVisibilityChange = () => {
 // 阻止右键菜单（电视环境）
 const preventContextMenu = (e) => e.preventDefault()
 
-// 测试API连通性（真实调用接口）
+// 测试API连通性(真实调用接口)
 const testApiConnectivity = async () => {
   const testName = '张富杰'
-  const encodedName = encodeURIComponent(testName)
   const isDevelopment = import.meta.env.MODE === 'development'
   
   // 测试内网API
-  const testInternalApi = () => {
-    return new Promise((resolve) => {
+  const testInternalApi = async () => {
+    try {
       const baseUrl = isDevelopment ? '' : 'http://10.10.30.249:32547'
-      const url = `${baseUrl}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=1&realName=${encodedName}`
-      const xhr = new XMLHttpRequest()
+      const url = `${baseUrl}/zt/task/report/pageIndividualTaskReport`
       
-      xhr.timeout = 5000
+      const response = await axios.get(url, {
+        params: {
+          pageNum: 1,
+          pageSize: 1,
+          realName: testName
+        },
+        timeout: 5000,
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
       
-      xhr.onload = function() {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const result = JSON.parse(xhr.responseText)
-            apiStatus.value.internal = result.code === 0
-          } catch (err) {
-            apiStatus.value.internal = false
-            // 显示错误弹窗
-            errorDialog.value = {
-              show: true,
-              url: url,
-              type: '内网API - 解析错误',
-              message: err.message,
-              env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}`
-            }
-          }
+      const result = response.data
+      apiStatus.value.internal = result.code === 0
+      
+    } catch (err) {
+      apiStatus.value.internal = false
+      
+      // 增强错误信息
+      let errorType = '内网API - 未知错误'
+      let errorMessage = err.message || '未知错误'
+      let additionalInfo = ''
+      
+      if (axios.isAxiosError(err)) {
+        if (err.response) {
+          // 服务器返回了错误响应
+          errorType = '内网API - HTTP错误'
+          errorMessage = `HTTP ${err.response.status}: ${err.response.statusText}`
+          additionalInfo = `Response data: ${JSON.stringify(err.response.data)}`
+        } else if (err.request) {
+          // 请求已发出,但没有收到响应
+          errorType = '内网API - 网络错误(无响应)'
+          errorMessage = '请求已发送,但服务器未响应'
+          additionalInfo = `Request: ${err.request._url || err.config?.url || 'Unknown'}`
         } else {
-          apiStatus.value.internal = false
-          // 显示错误弹窗
-          errorDialog.value = {
-            show: true,
-            url: url,
-            type: '内网API - HTTP错误',
-            message: `HTTP ${xhr.status}: ${xhr.statusText}`,
-            env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}`
-          }
+          // 请求配置出错
+          errorType = '内网API - 请求配置错误'
+          errorMessage = err.message
         }
-        resolve()
       }
       
-      xhr.onerror = () => {
-        apiStatus.value.internal = false
-        // 显示错误弹窗
-        errorDialog.value = {
-          show: true,
-          url: url,
-          type: '内网API - 网络错误',
-          message: `无法连接到服务器（readyState: ${xhr.readyState}, status: ${xhr.status}）`,
-          env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}, MODE=${import.meta.env.MODE}`
-        }
-        resolve()
+      if (err.code === 'ECONNABORTED') {
+        errorType = '内网API - 请求超时'
+        errorMessage = '连接超时(5秒)'
+      } else if (err.code === 'ERR_NETWORK') {
+        errorType = '内网API - 网络错误'
+        errorMessage = '网络连接失败,可能被WebView安全策略阻止'
       }
       
-      xhr.ontimeout = () => {
-        apiStatus.value.internal = false
-        // 显示错误弹窗
-        errorDialog.value = {
-          show: true,
-          url: url,
-          type: '内网API - 超时',
-          message: '请求超时（5秒）',
-          env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}`
-        }
-        resolve()
+      // 显示详细错误弹窗
+      errorDialog.value = {
+        show: true,
+        url: err.config?.url || 'http://10.10.30.249:32547/zt/task/report/pageIndividualTaskReport',
+        type: errorType,
+        message: `${errorMessage}\n${additionalInfo}`,
+        env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}, MODE=${import.meta.env.MODE}, isAxiosError=${axios.isAxiosError(err)}, code=${err.code || 'none'}`
       }
-      
-      xhr.open('GET', url, true)
-      xhr.setRequestHeader('Accept', 'application/json')
-      xhr.send()
-    })
+    }
   }
   
-  // 并行测试（暂时只测试内网）
+  // 并行测试(暂时只测试内网)
   await testInternalApi()
 }
 
@@ -1811,13 +1792,15 @@ border-color: rgba(105, 81, 37, 1);
   color: #ffd700;
 }
 
-.error-url {
+.error-url, .error-message, .error-env {
   word-break: break-all;
   background: rgba(0, 0, 0, 0.3);
   padding: 1vh;
   border-radius: 4px;
   font-family: monospace;
   font-size: 0.9vw;
+  white-space: pre-wrap;
+  line-height: 1.5;
 }
 
 .error-dialog-close {
