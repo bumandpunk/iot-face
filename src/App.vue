@@ -6,35 +6,10 @@
         <img src="./assets/images/logo-network.png" alt="logo" class="network-logo" />
         <span class="status-dot" :class="{ active: isConnected }"></span>
         <span>捷租生态网络已覆盖</span>
-        <div class="api-status">
-          <span class="api-status-item" :class="apiStatus.internal ? 'connected' : 'disconnected'">
-            内网API {{ apiStatus.internal ? '✓' : '✗' }}
-          </span>
-          <span class="api-status-item" :class="apiStatus.external ? 'connected' : 'disconnected'">
-            外网API {{ apiStatus.external ? '✓' : '✗' }}
-          </span>
-        </div>
       </div>
      
       <div class="datetime">{{ currentTime }}</div>
     </header>
-
-    <!-- 错误提示弹窗 -->
-    <div v-if="errorDialog.show" class="error-dialog">
-      <div class="error-dialog-content">
-        <div class="error-dialog-header">⚠️ API 调用错误</div>
-        <div class="error-dialog-body">
-          <p><strong>错误类型:</strong> {{ errorDialog.type }}</p>
-          <p><strong>错误信息:</strong></p>
-          <p class="error-message">{{ errorDialog.message }}</p>
-          <p><strong>请求URL:</strong></p>
-          <p class="error-url">{{ errorDialog.url }}</p>
-          <p><strong>环境信息:</strong></p>
-          <p class="error-env">{{ errorDialog.env }}</p>
-        </div>
-        <button class="error-dialog-close" @click="errorDialog.show = false">关闭</button>
-      </div>
-    </div>
 
     <!-- 主内容区 -->
     <div class="dashboard-content">
@@ -235,21 +210,6 @@ const updateTime = () => {
 // 连接状态
 const isConnected = ref(false)
 
-// API连接状态
-const apiStatus = ref({
-  internal: false,  // 内网API状态
-  external: false   // 外网API状态
-})
-
-// 错误对话框
-const errorDialog = ref({
-  show: false,
-  url: '',
-  type: '',
-  message: '',
-  env: ''
-})
-
 // 统计数据
 const stats = ref({
   scheduledCount: 0,      // 今日应到岗人数(原expectedCount)
@@ -396,27 +356,57 @@ const connectSSE = () => {
       resetHeartbeatTimer()
     }
     
-    // 监听服务端推送的数据（5秒心跳 + 完整数据）
+    // 监听服务端推送的数据(5秒心跳 + 完整数据)
     eventSource.addEventListener('dashboard-data-popup', (event) => {
       try {
-        const data = JSON.parse(event.data)
+        // 修复服务端返回的 popup.task 字段未转义问题
+        let eventData = event.data
+        
+        // 查找 "task": " 开始位置
+        const taskStartPattern = /"task":\s*"/
+        const taskStartMatch = eventData.match(taskStartPattern)
+        
+        if (taskStartMatch) {
+          const taskStartIndex = eventData.indexOf(taskStartMatch[0]) + taskStartMatch[0].length
+          
+          // 查找对应的结束位置（跳过内部的引号，找到真正的结束引号）
+          // 策略：找到 }"}，这是 task 字段的结束标记
+          const taskEndPattern = /}"\s*}/
+          const afterTaskStart = eventData.substring(taskStartIndex)
+          const taskEndMatch = afterTaskStart.match(taskEndPattern)
+          
+          if (taskEndMatch) {
+            const taskEndIndex = afterTaskStart.indexOf(taskEndMatch[0])
+            const taskJsonString = afterTaskStart.substring(0, taskEndIndex + 1) // 包含最后的 }
+            
+            // 将 task 内部的双引号替换为单引号
+            const fixedTaskJson = taskJsonString.replace(/"/g, "'")
+            
+            // 重建完整的 eventData
+            eventData = eventData.substring(0, taskStartIndex) + 
+                        fixedTaskJson + 
+                        afterTaskStart.substring(taskEndIndex + 1)
+          }
+        }
+        
+        const data = JSON.parse(eventData)
         log('🔔 收到SSE数据推送:', data.type || 'heartbeat', data)
         
         // 处理心跳消息
         if (data.type === 'heartbeat') {
           isConnected.value = true
-          log('💓 收到心跳消息，重置超时检测')
+          // log('💓 收到心跳消息，重置超时检测')
           resetHeartbeatTimer() // 收到心跳，重置超时定时器
           return
         }
         
         // 处理完整数据推送
         if (data.type === 'data') {
-          log('📊 处理数据推送 - data存在:', !!data.data, 'popup存在:', !!data.popup)
+          // log('📊 处理数据推送 - data存在:', !!data.data, 'popup存在:', !!data.popup)
           
           // 处理看板数据（metrics）
           if (data.data) {
-            log('📈 开始更新看板数据:', data.data)
+            // log('📈 开始更新看板数据:', data.data)
             handleDashboardData(data.data)
           }
           // 处理人员进出弹窗（popup）
@@ -540,6 +530,7 @@ const handleDashboardData = (dashboard) => {
 }
 
 // 显示人员进出弹窗
+// 显示人员进出弹窗
 const showPersonPopup = async (popup) => {
   // 数据校验
   if (!popup || typeof popup !== 'object') {
@@ -561,10 +552,34 @@ const showPersonPopup = async (popup) => {
   // 格式化时间
   const formattedTime = formatDateTime(popup.time)
   
-  // 标记正在加载任务
-  isLoadingTasks.value = true
+  // 从 SSE 数据中获取任务列表
+  // popup.task 是 JSON 字符串（内部使用单引号），需要先转换并解析
+  let tasks = []
+  let taskCount = 0
+  try {
+    if (popup.task) {
+      // 如果是字符串，先将单引号替换回双引号再解析
+      let taskJsonString = popup.task
+      if (typeof taskJsonString === 'string') {
+        taskJsonString = taskJsonString.replace(/'/g, '"')
+      }
+      const taskData = typeof taskJsonString === 'string' ? JSON.parse(taskJsonString) : taskJsonString
+      taskCount = taskData.taskCount || 0
+      const taskList = taskData.taskInfoVos || []
+      tasks = taskList.map(task => ({
+        id: task.id,
+        projectName: getProjectNameFromTaskName(task.name),
+        taskName: task.name,
+        duration: task.estimate ? `${task.estimate}小时` : '-',
+        deadline: task.deadline ? formatDateDeadline(task.deadline) : '-',
+        status: task.status
+      }))
+    }
+  } catch (err) {
+    error('❌ 解析任务数据失败:', err)
+  }
   
-  // 先设置基础信息，让弹窗显示
+  // 设置弹窗数据
   popupData.value = {
     type: actionType,
     avatar: avatarUrl,
@@ -572,115 +587,21 @@ const showPersonPopup = async (popup) => {
     location: popup.dev_name || popup.location || '策维3107神域',
     time: formattedTime,
     todayCount: popup.count || 0,
-    taskCount: 0,
-    tasks: [],
+    taskCount: taskCount,
+    tasks: tasks,
     personType: popup.personType || 0
   }
   
-  showPopup.value = true
-  
-  // 获取任务列表（异步，不阻塞弹窗显示）
-  const taskResult = await fetchPersonTasks(popup.name)
-  
-  // 标记加载完成
+  // 任务已从SSE获取，不再显示加载状态
   isLoadingTasks.value = false
   
-  // 更新任务数据
-  popupData.value.taskCount = taskResult.taskCount
-  popupData.value.tasks = taskResult.tasks
+  showPopup.value = true
   
   // 自动关闭弹窗
   popupTimer = setTimeout(() => {
     showPopup.value = false
     popupTimer = null
   }, POPUP_AUTO_CLOSE_TIME)
-}
-
-// 获取人员任务列表 - 使用原始 XMLHttpRequest (最可靠)
-const fetchPersonTasks = async (realName) => {
-  return new Promise((resolve) => {
-    try {
-      if (!realName) {
-        resolve({ taskCount: 0, tasks: [] })
-        return
-      }
-
-      const isDevelopment = import.meta.env.MODE === 'development'
-      const taskApiBase = isDevelopment ? '' : (import.meta.env.VITE_TASK_API_URL || 'http://10.10.30.249:32547')
-      
-      const apiUrl = `${taskApiBase}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=5&realName=${encodeURIComponent(realName)}`
-      
-      const xhr = new XMLHttpRequest()
-      xhr.timeout = 15000
-      
-      xhr.onload = function() {
-        try {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            const result = JSON.parse(xhr.responseText)
-            
-            if (result.code !== 0) {
-              resolve({ taskCount: 0, tasks: [] })
-              return
-            }
-            
-            const { data } = result
-            
-            if (!data || !data.taskInfoVos) {
-              resolve({ taskCount: data?.taskCount || 0, tasks: [] })
-              return
-            }
-            
-            let taskList = Array.isArray(data.taskInfoVos) ? data.taskInfoVos : []
-            
-            if (taskList.length === 0) {
-              resolve({ taskCount: data.taskCount || 0, tasks: [] })
-              return
-            }
-            
-            const tasks = taskList.map(task => ({
-              id: task.id,
-              projectName: getProjectNameFromTaskName(task.name),
-              taskName: task.name,
-              duration: task.estimate ? `${task.estimate}小时` : '-',
-              deadline: task.deadline ? formatDateDeadline(task.deadline) : '-',
-              status: task.status
-            }))
-            
-            resolve({
-              taskCount: data.taskCount || 0,
-              tasks: tasks
-            })
-          } else {
-            resolve({ taskCount: 0, tasks: [] })
-          }
-        } catch (err) {
-          resolve({ taskCount: 0, tasks: [] })
-        }
-      }
-      
-      xhr.onerror = function() {
-        errorDialog.value = {
-          show: true,
-          url: apiUrl,
-          type: '任务API - 网络错误',
-          message: `readyState=${xhr.readyState}, status=${xhr.status}, statusText=${xhr.statusText}`,
-          env: `XHR error, URL=${apiUrl}`
-        }
-        resolve({ taskCount: 0, tasks: [] })
-      }
-      
-      xhr.ontimeout = function() {
-        resolve({ taskCount: 0, tasks: [] })
-      }
-      
-      xhr.open('GET', apiUrl, true)
-      xhr.setRequestHeader('Accept', 'application/json')
-      xhr.send()
-      
-    } catch (err) {
-      resolve({ taskCount: 0, tasks: [] })
-    }
-  })
 }
 
 // 从任务名称中提取项目名称
@@ -717,6 +638,7 @@ const formatDateDeadline = (dateStr) => {
   }
 }
 
+
 // 请求并管理 Wake Lock
 const requestWakeLock = async () => {
   if ('wakeLock' in navigator) {
@@ -744,74 +666,11 @@ const handleVisibilityChange = () => {
 // 阻止右键菜单（电视环境）
 const preventContextMenu = (e) => e.preventDefault()
 
-// 测试API连通性(真实调用接口) - 使用 XMLHttpRequest
-const testApiConnectivity = async () => {
-  const testName = '张富杰'
-  const isDevelopment = import.meta.env.MODE === 'development'
-  
-  // 测试内网API
-  const testInternalApi = () => {
-    return new Promise((resolve) => {
-      const baseUrl = isDevelopment ? '' : 'http://10.10.30.249:32547'
-      const url = `${baseUrl}/zt/task/report/pageIndividualTaskReport?pageNum=1&pageSize=1&realName=${encodeURIComponent(testName)}`
-      const xhr = new XMLHttpRequest()
-      
-      xhr.timeout = 8000
-      
-      xhr.onload = function() {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const result = JSON.parse(xhr.responseText)
-            apiStatus.value.internal = result.code === 0
-          } catch (err) {
-            apiStatus.value.internal = false
-          }
-        } else {
-          apiStatus.value.internal = false
-        }
-        resolve()
-      }
-      
-      xhr.onerror = () => {
-        apiStatus.value.internal = false
-        errorDialog.value = {
-          show: true,
-          url: url,
-          type: '内网API - XMLHttpRequest错误',
-          message: `readyState=${xhr.readyState}, status=${xhr.status}, responseText=${xhr.responseText.substring(0, 100)}`,
-          env: `VITE_TASK_API_URL=${import.meta.env.VITE_TASK_API_URL || '未定义'}, MODE=${import.meta.env.MODE}`
-        }
-        resolve()
-      }
-      
-      xhr.ontimeout = () => {
-        apiStatus.value.internal = false
-        resolve()
-      }
-      
-      xhr.open('GET', url, true)
-      xhr.setRequestHeader('Accept', 'application/json')
-      xhr.send()
-    })
-  }
-  
-  // 测试内网
-  await testInternalApi()
-}
-
 // 生命周期
 onMounted(() => {
   // 启动时间更新定时器
   updateTime()
   timeUpdateTimer = setInterval(updateTime, 1000)
-  
-  // 验证环境变量（重要！）
-  if (!import.meta.env.VITE_TASK_API_URL) {
-    console.error('⚠️ VITE_TASK_API_URL 未定义！使用默认值')
-  }
-  
-  // 测试API连通性
-  testApiConnectivity()
   
   // 连接SSE
   connectSSE()
@@ -924,33 +783,6 @@ onUnmounted(() => {
   color: #FFFFFF;
   font-weight: 500;
   flex-wrap: wrap;
-}
-
-.api-status {
-  display: flex;
-  gap: 0.8vw;
-  margin-left: 1vw;
-  font-size: 0.9vw;
-}
-
-.api-status-item {
-  padding: 0.3vh 0.6vw;
-  border-radius: 3px;
-  font-size: 0.85vw;
-  font-weight: 400;
-  transition: all 0.3s;
-}
-
-.api-status-item.connected {
-  background: rgba(82, 196, 26, 0.2);
-  color: #52c41a;
-  border: 1px solid rgba(82, 196, 26, 0.5);
-}
-
-.api-status-item.disconnected {
-  background: rgba(245, 34, 45, 0.2);
-  color: #f5222d;
-  border: 1px solid rgba(245, 34, 45, 0.5);
 }
 
 .network-logo {
@@ -1742,81 +1574,6 @@ border-color: rgba(105, 81, 37, 1);
 }
 
 /* 错误对话框 */
-.error-dialog {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-}
-
-.error-dialog-content {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 3vh 2vw;
-  border-radius: 12px;
-  max-width: 60vw;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-}
-
-.error-dialog-header {
-  font-size: 1.5vw;
-  font-weight: bold;
-  color: #fff;
-  margin-bottom: 2vh;
-  text-align: center;
-}
-
-.error-dialog-body {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2vh 1.5vw;
-  border-radius: 8px;
-  margin-bottom: 2vh;
-  color: #fff;
-  font-size: 1vw;
-  line-height: 1.8;
-}
-
-.error-dialog-body p {
-  margin: 1vh 0;
-}
-
-.error-dialog-body strong {
-  color: #ffd700;
-}
-
-.error-url, .error-message, .error-env {
-  word-break: break-all;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 1vh;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 0.9vw;
-  white-space: pre-wrap;
-  line-height: 1.5;
-}
-
-.error-dialog-close {
-  width: 100%;
-  padding: 1vh;
-  background: #f5222d;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 1.2vw;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.error-dialog-close:hover {
-  background: #cf1322;
-  transform: scale(1.02);
-}
-
 /* 弹窗动画 */
 .popup-enter-active, .popup-leave-active {
   transition: all 0.3s ease;
