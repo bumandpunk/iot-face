@@ -11,6 +11,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-dashboard
+dist-kitchen
 *.local
 
 # Editor directories and files
@@ -42,6 +44,9 @@ android/.cxx/
 # Capacitor
 ios/
 android/app/src/main/assets/public/
+
+# Build outputs
+apk-output/
 
 # 冗余文档（保留README.md）
 打包完成说明.md

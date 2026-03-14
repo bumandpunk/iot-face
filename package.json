@@ -4,8 +4,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:kitchen": "vite --mode development",
     "build": "vite build",
     "build:prod": "vite build --mode production",
+    "build:dashboard": "node build-dashboard.js",
+    "build:kitchen": "node build-kitchen.js",
+    "build:both": "npm run build:dashboard && npm run build:kitchen",
     "preview": "vite preview",
     "cap:init": "cap init",
     "cap:add:android": "cap add android",
@@ -16,6 +20,7 @@
   "dependencies": {
     "axios": "^1.13.4",
     "echarts": "^5.5.0",
+    "fs-extra": "^11.2.0",
     "vue": "^3.4.15",
     "vue-echarts": "^6.6.9"
   },

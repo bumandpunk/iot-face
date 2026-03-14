@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import legacy from '@vitejs/plugin-legacy'
+import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [
@@ -41,6 +42,10 @@ export default defineConfig({
     minify: 'esbuild',
     cssTarget: 'chrome49', // 兼容Android 5.x WebView
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        kitchen: resolve(__dirname, 'kitchen.html')
+      },
       output: {
         manualChunks: {
           'echarts': ['echarts', 'vue-echarts']
