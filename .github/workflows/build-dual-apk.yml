@@ -38,16 +38,11 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug
 
-      - name: Rename Dashboard APK
-        run: |
-          mkdir -p apk-output
-          cp android/app/build/outputs/apk/debug/app-debug.apk apk-output/dashboard-debug.apk
-
       - name: Upload Dashboard APK
         uses: actions/upload-artifact@v4
         with:
           name: dashboard-apk
-          path: apk-output/dashboard-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
   build-kitchen:
@@ -80,67 +75,9 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug
 
-      - name: Rename Kitchen APK
-        run: |
-          mkdir -p apk-output
-          cp android/app/build/outputs/apk/debug/app-debug.apk apk-output/kitchen-debug.apk
-
       - name: Upload Kitchen APK
         uses: actions/upload-artifact@v4
         with:
           name: kitchen-apk
-          path: apk-output/kitchen-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
-
-  create-release:
-    name: Create Release
-    needs: [build-dashboard, build-kitchen]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-    
-    steps:
-      - name: Download Dashboard APK
-        uses: actions/download-artifact@v4
-        with:
-          name: dashboard-apk
-          path: ./apks
-
-      - name: Download Kitchen APK
-        uses: actions/download-artifact@v4
-        with:
-          name: kitchen-apk
-          path: ./apks
-
-      - name: Get current date
-        id: date
-        run: echo "date=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.date.outputs.date }}
-          name: Release ${{ steps.date.outputs.date }}
-          body: |
-            ## 自动构建发布
-            
-            本次发布包含两个独立的 APK：
-            
-            ### 📱 门禁看板 (Dashboard)
-            - 文件名: `dashboard-debug.apk`
-            - 功能: 门禁打卡、空间分析、流量统计
-            
-            ### 🍳 厨房考勤看板 (Kitchen)
-            - 文件名: `kitchen-debug.apk`
-            - 功能: 厨房考勤、任务管理
-            
-            ---
-            
-            **构建时间**: ${{ steps.date.outputs.date }}
-            **提交**: ${{ github.sha }}
-          files: |
-            ./apks/dashboard-debug.apk
-            ./apks/kitchen-debug.apk
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
